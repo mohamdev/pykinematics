@@ -13,7 +13,7 @@ def create_data(file_name: str)->Tuple[Dict, Dict]:
     """
     data = pd.read_csv(file_name).to_numpy()
     data = data[:,1:-1]
-    values = []
+    time_vector = data[2:,0].astype(float)
 
     x = data[1,:] # Get label names
     labels = x[~pd.isnull(x)].tolist() #removes nan values
@@ -30,13 +30,29 @@ def create_data(file_name: str)->Tuple[Dict, Dict]:
     for i in range(len(JCP)):
         mapping[JCP[i]] = labels[i*3:(i*3)+3]
 
-    labels = ['Time']+labels # add Time label
+    labels = labels # add Time label
 
-    data = data[2:,:]
+    data = data[2:,:].astype(float)
 
     d=dict(zip(labels,data.T))
 
-    return d,mapping
+    # Create an empty dictionary for the combined arrays
+    d3 = {'Time': time_vector}
+
+    # Iterate over each key-value pair in d2
+    for key, value in mapping.items():
+        # Extract the arrays corresponding to the markers in value from d1
+        arrays = [d[marker] for marker in value]
+        # Combine the arrays into a single 3D array
+        combined_array = np.array(arrays)
+        # Transpose the array to have the shape (3, n), where n is the number of data points
+        combined_array = np.transpose(combined_array)
+        # Store the combined array in d3 with the key from d2
+        d3[key] = combined_array
+
+    return d3,mapping
+
+
 
 
 
