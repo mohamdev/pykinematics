@@ -32,10 +32,10 @@ def create_data(file_name: str)->Tuple[Dict, Dict]:
 
     labels = labels # add Time label
 
-    data = data[2:,:].astype(float)
+    data = data[2:,1:].astype(float)
 
     d=dict(zip(labels,data.T))
-
+    
     # Create an empty dictionary for the combined arrays
     d3 = {'Time': time_vector}
 
