@@ -3,9 +3,10 @@ import pinocchio as pin
 import numpy as np
 from scipy.spatial.transform import Rotation as R
 import pinocchio as pin
+from typing import List, Tuple, Dict
 
 #Build inertia matrix from 6 inertia components
-def make_inertia_matrix(ixx, ixy, ixz, iyy, iyz, izz):
+def make_inertia_matrix(ixx:float, ixy:float, ixz:float, iyy:float, iyz:float, izz:float)->np.ndarray:
     return np.array([[ixx, ixy, ixz], [ixy, iyy, iyz], [ixz, iyz, izz]])
 
 #Function that takes as input a matrix and orthogonalizes it
@@ -195,7 +196,7 @@ def construct_segments_frames_challenge(mocap_mks_positions):
     #     print(name, " rot det : ", np.linalg.det(pose[:3,:3]))
     return sgts_poses
 
-def get_segments_lstm_mks_dict_challenge():
+def get_segments_lstm_mks_dict_challenge()->Dict:
     #This fuction returns a dictionnary containing the segments names, and the corresponding list of lstm
     #mks names attached to the segment
     # Constructing the dictionary to store segment poses
@@ -210,20 +211,29 @@ def get_segments_lstm_mks_dict_challenge():
     }
     return sgts_mks_dict
 
-def get_subset_challenge_mks_names():
-    #This function returns the subset of markers used to track the right body side kinematics with pinocchio
+def get_subset_challenge_mks_names()->List:
+    """_This function returns the subset of markers used to track the right body side kinematics with pinocchio_
+
+    Returns:
+        List: _the subset of markers used to track the right body side kinematics with pinocchio_
+    """
     mks_names = ['RShoulder', 'r_shoulder_study', 'L_shoulder_study', 'LShoulder', 'Neck', 'C7_study', 'r_melbow_study', 'r_lelbow_study', 'RElbow',
                  'r_lwrist_study', 'r_mwrist_study', 'RWrist','r.PSIS_study', 'L.PSIS_study', 'r.ASIS_study', 'L.ASIS_study', 'RHip', 'LHip', 'LHJC_study', 'RHJC_study', 'midHip',
                  'r_knee_study', 'r_mknee_study', 'RKnee', 'r_thigh2_study', 'r_thigh3_study', 'r_thigh1_study','r_sh3_study', 'r_sh2_study', 'r_sh1_study',
                  'r_ankle_study', 'r_mankle_study', 'RAnkle', 'r_calc_study', 'RHeel', 'r_5meta_study', 'RSmallToe', 'r_toe_study', 'RBigToe']
     return mks_names
 
-#Build model
-# - sgts_poses corresponds to a dictionnary to segments poses and names, constructed from global mks positions
-# - lstm_mks_positions is a dictionnary of lstm mks names and 3x1 global positions
-# - sgts_mks_dict a dictionnary containing the segments names, and the corresponding list of lstm mks names attached to the segment
-# - returns a dictionnary of lstm mks names and their 3x1 local positions 
-def get_local_lstm_mks_positions(sgts_poses, lstm_mks_positions, sgts_mks_dict):
+def get_local_lstm_mks_positions(sgts_poses: Dict, lstm_mks_positions: Dict, sgts_mks_dict: Dict)-> Dict:
+    """_Get the local 3D position of the lstms markers_
+
+    Args:
+        sgts_poses (Dict): _sgts_poses corresponds to a dictionnary to segments poses and names, constructed from global mks positions_
+        lstm_mks_positions (Dict): _lstm_mks_positions is a dictionnary of lstm mks names and 3x1 global positions_
+        sgts_mks_dict (Dict): _sgts_mks_dict a dictionnary containing the segments names, and the corresponding list of lstm mks names attached to the segment_
+
+    Returns:
+        Dict: _returns a dictionnary of lstm mks names and their 3x1 local positions_
+    """
     lstm_mks_local_positions = {}
 
     for segment, markers in sgts_mks_dict.items():
@@ -246,8 +256,15 @@ def get_local_lstm_mks_positions(sgts_poses, lstm_mks_positions, sgts_mks_dict):
 
     return lstm_mks_local_positions
 
-#this function returns a dictionnary of local positions for each segment except pelvis
-def get_local_segments_positions(sgts_poses):
+def get_local_segments_positions(sgts_poses: Dict)->Dict:
+    """_Get the local positions of the segments_
+
+    Args:
+        sgts_poses (Dict): _a dictionnary of segment poses_
+
+    Returns:
+        Dict: _returns a dictionnary of local positions for each segment except pelvis_
+    """
     # Initialize the dictionary to store local positions
     local_positions = {}
 
@@ -296,12 +313,17 @@ def get_local_segments_positions(sgts_poses):
     return local_positions
 
 
-#Build model
-# - mocap_mks_positions is a dictionnary of mocap mks names and 3x1 global positions
-# - lstm_mks_positions is a dictionnary of lstm mks names and 3x1 global positions
-# - meshes_folder_path is the path to the folder containing the meshes
-# - returns the pinocchio model, geometry model, and a dictionnary with visuals.
-def build_model_challenge(mocap_mks_positions, lstm_mks_positions, meshes_folder_path):
+def build_model_challenge(mocap_mks_positions: Dict, lstm_mks_positions: Dict, meshes_folder_path: str)->Tuple[pin.Model,pin.GeomModel, Dict]:
+    """_Build the biomechanical model associated to one exercise for one subject_
+
+    Args:
+        mocap_mks_positions (Dict): _mocap_mks_positions is a dictionnary of mocap mks names and 3x1 global positions_
+        lstm_mks_positions (Dict): _lstm_mks_positions is a dictionnary of lstm mks names and 3x1 global positions_
+        meshes_folder_path (str): _meshes_folder_path is the path to the folder containing the meshes_
+
+    Returns:
+        Tuple[pin.Model,pin.GeomModel, Dict]: _returns the pinocchio model, geometry model, and a dictionnary with visuals._
+    """
     sgts_poses = construct_segments_frames_challenge(mocap_mks_positions)
     sgts_mks_dict = get_segments_lstm_mks_dict_challenge()
     lstm_mks_local_positions = get_local_lstm_mks_positions(sgts_poses, lstm_mks_positions, sgts_mks_dict)
@@ -468,6 +490,8 @@ def build_model_challenge(mocap_mks_positions, lstm_mks_positions, meshes_folder
     #     print(("{:<24} : {: .2f} {: .2f} {: .2f}"
     #         .format( name, *oMi.translation.T.flat )))
 
+    model.upperPositionLimit = np.array([])
+    model.lowerPositionLimit = np.array([])
 
     return model, geom_model, visuals_dict
 
