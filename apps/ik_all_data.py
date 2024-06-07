@@ -35,6 +35,6 @@ for subject in subjects :
         q = ik_problem.solve_ik()
 
         q=np.array(q)
-        directory_name = "results/"+subject+"/"+task
+        directory_name = "results/calib_lstm/"+subject+"/"+task
         write_joint_angle_results(directory_name,q)
 
