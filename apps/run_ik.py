@@ -7,7 +7,10 @@ from pinocchio.visualize import GepettoVisualizer
 from utils.viz_utils import place
 import numpy as np 
 
-fichier_csv_lstm_mks = "data/jcp_coordinates_ncameras_augmented.csv"
+subject = 'sujet_1'
+task = 'Exotique'
+
+fichier_csv_lstm_mks = "data/"+subject+"/"+task+"/jcp_coordinates_ncameras_augmented.csv"
 fichier_csv_mocap_mks = "data/mks_coordinates_3D.trc"
 meshes_folder_path = "meshes/" #Changes le par ton folder de meshes
 

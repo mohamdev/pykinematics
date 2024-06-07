@@ -27,9 +27,13 @@ class IK_Casadi:
 
         ### CASADI FRAMEWORK
         self._nq = self._cmodel.nq
-        cq = casadi.SX.sym("q", self._nq, 1)
+        self._nv = self._cmodel.nv
+
+        cq = casadi.SX.sym("q",self._nq,1)
+        cdq = casadi.SX.sym("dq",self._nv,1)
 
         cpin.framesForwardKinematics(self._cmodel, self._cdata, cq)
+        self._integrate = casadi.Function('integrate',[ cq,cdq ],[cpin.integrate(self._cmodel,cq,cdq) ])
 
         cfunction_list = []
         self._new_key_list = [] # Only take the frames that are in the model 
@@ -74,20 +78,16 @@ class IK_Casadi:
         opti = casadi.Opti()
 
         # Variables MX type
-        Q = opti.variable(self._nq, 1)   # state trajectory
+        DQ = opti.variable(self._nv)
+        Q = self._integrate(self._q0,DQ)
 
         cost = 0
         for key in self._cfunction_dict.keys():
             cost+=100*casadi.sumsqr(meas[key]-self._cfunction_dict[key](Q)) + 0.01*casadi.sum1(self._q0-Q) #LASSO 
-        
-        # Initial values for solver
-        opti.set_initial(Q, self._q0)
 
-        # TODO: Set the constraint for the joint limits
+        # Set the constraint for the joint limits
         for i in range(7,self._nq):
             opti.subject_to(opti.bounded(self._model.lowerPositionLimit[i],Q[i],self._model.upperPositionLimit[i]))
-
-        opti.subject_to(casadi.sqrt(Q[3]*Q[3]+Q[4]*Q[4]+Q[5]*Q[5]+Q[6]*Q[6])==1) # Norm of quaternion must be unitary 
         
         opti.minimize(cost)
 
