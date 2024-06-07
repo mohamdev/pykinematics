@@ -76,8 +76,6 @@ class IK_Casadi:
         sol = opti.solve_limited()
         
         q_i = sol.value(Q)
-        print(q_i)
-        input()
         return q_i 
 
     def solve_ik(self)->List:
