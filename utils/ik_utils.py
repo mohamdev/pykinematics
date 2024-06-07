@@ -144,35 +144,36 @@ class IK_Singlebody:
         r = R.from_rotvec(axis * theta)
         return r.as_euler(convention)
 
+    def to_rotation_matrix(self, orientation: np.ndarray)->np.ndarray:
+        if isinstance(orientation, np.ndarray) and orientation.shape == (3, 3):
+            return orientation
+        elif isinstance(orientation, np.ndarray) and orientation.shape == (4,):
+            return R.from_quat(orientation).as_matrix()
+        elif isinstance(orientation, np.ndarray) and orientation.shape == (3,):
+            return R.from_rotvec(orientation).as_matrix()
+        else:
+            raise ValueError("Invalid orientation format")
+
     def solve_ik(self, parent_orientation: np.ndarray, child_orientation: np.ndarray, convention: str):
-        if isinstance(parent_orientation, np.ndarray) and parent_orientation.shape == (3, 3):
-            parent_euler = self.rotation_matrix_to_euler(parent_orientation, convention)
-        elif isinstance(parent_orientation, np.ndarray) and parent_orientation.shape == (4,):
-            parent_euler = self.quaternion_to_euler(parent_orientation, convention)
-        elif isinstance(parent_orientation, np.ndarray) and parent_orientation.shape == (3,):
-            parent_euler = self.rodrigues_to_euler(parent_orientation, convention)
-        else:
-            raise ValueError("Invalid parent orientation format")
+        # Convert parent_orientation and child_orientation to rotation matrices if they are not already
+        parent_matrix = self.to_rotation_matrix(parent_orientation)
+        child_matrix = self.to_rotation_matrix(child_orientation)
 
-        if isinstance(child_orientation, np.ndarray) and child_orientation.shape == (3, 3):
-            child_euler = self.rotation_matrix_to_euler(child_orientation, convention)
-        elif isinstance(child_orientation, np.ndarray) and child_orientation.shape == (4,):
-            child_euler = self.quaternion_to_euler(child_orientation, convention)
-        elif isinstance(child_orientation, np.ndarray) and child_orientation.shape == (3,):
-            child_euler = self.rodrigues_to_euler(child_orientation, convention)
-        else:
-            raise ValueError("Invalid child orientation format")
+        # Calculate the relative rotation matrix
+        relative_matrix = np.linalg.inv(parent_matrix).dot(child_matrix)
 
-        joint_angles = child_euler - parent_euler
+        # Convert the relative rotation matrix to euler angles with the given convention
+        joint_angles = self.rotation_matrix_to_euler(relative_matrix, convention)
+        
         return joint_angles
 
-# Example usage
-dk = IK_Singlebody()
-parent_orientation_matrix = np.eye(3)
-child_orientation_matrix = R.from_euler('xyz', [45, 45, 45], degrees=True).as_matrix()
-convention = 'xyz'
-joint_angles = dk.direct_kinematics(parent_orientation_matrix, child_orientation_matrix, convention)
-print("Joint angles:", joint_angles)
+# # Example usage
+# dk = IK_Singlebody()
+# parent_orientation_matrix = np.eye(3)
+# child_orientation_matrix = R.from_euler('xyz', [45, 45, 45], degrees=True).as_matrix()
+# convention = 'xyz'
+# joint_angles = dk.solve_ik(parent_orientation_matrix, child_orientation_matrix, convention)
+# print("Joint angles:", joint_angles)
 
 
 

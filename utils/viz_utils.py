@@ -18,6 +18,7 @@ def visualize_joint_angle_results(directory_name:str, viz, model):
     input('Are you ready to record the results ?')
     for ii in range(q.shape[1]):
         q_ii=q[:,ii]
+        print(q_ii)
         viz.display(q_ii)
         time.sleep(0.016)
         
