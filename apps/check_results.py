@@ -10,7 +10,7 @@ from utils.model_utils import get_subset_challenge_mks_names, get_segments_lstm_
 from utils.viz_utils import place, visualize_joint_angle_results
 
 subject = 'sujet_1'
-task = 'Assis-debout'
+task = 'Exotique'
 
 fichier_csv_lstm_mks = "data/"+subject+"/"+task+"/jcp_coordinates_ncameras_augmented.csv"
 results_directory = "results/calib_lstm/"+subject+"/"+task
