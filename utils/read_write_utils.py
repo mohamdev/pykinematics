@@ -1,6 +1,6 @@
 import pandas as pd 
 import numpy as np
-from typing import Dict, Tuple 
+from typing import Dict, Tuple, List
 
 def read_lstm_data(file_name: str)->Tuple[Dict, Dict]:
     """_Creates two dictionnaries, one containing the 3D positions of all the markers output by the LSTM, another to map the number of the marks to the JC associated_
@@ -52,8 +52,15 @@ def read_lstm_data(file_name: str)->Tuple[Dict, Dict]:
 
     return d3,mapping
 
-def convert_to_list_of_dicts(dict_mks_data):
-    #This function converts a dictionnary of data outputed from read_lstm_data(), to a list of dictionnaries for each sample.
+def convert_to_list_of_dicts(dict_mks_data: Dict)-> List:
+    """_This function converts a dictionnary of data outputed from read_lstm_data(), to a list of dictionnaries for each sample._
+
+    Args:
+        dict_mks_data (Dict): _ dictionnary of data outputed from read_lstm_data()_
+
+    Returns:
+        List: _ list of dictionnaries for each sample._
+    """
     list_of_dicts = []
     for i in range(len(dict_mks_data['Time'])):
         curr_dict = {}

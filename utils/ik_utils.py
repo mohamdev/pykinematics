@@ -84,8 +84,10 @@ class IK_Casadi:
         opti.set_initial(Q, self._q0)
 
         # TODO: Set the constraint for the joint limits
-        for i in range(self._nq):
+        for i in range(7,self._nq):
             opti.subject_to(opti.bounded(self._model.lowerPositionLimit[i],Q[i],self._model.upperPositionLimit[i]))
+
+        opti.subject_to(casadi.sqrt(Q[3]*Q[3]+Q[4]*Q[4]+Q[5]*Q[5]+Q[6]*Q[6])==1) # Norm of quaternion must be unitary 
         
         opti.minimize(cost)
 
