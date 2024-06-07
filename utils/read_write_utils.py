@@ -134,3 +134,13 @@ def plot_joint_angle_results(directory_name:str):
         plt.plot(q_i)
         plt.title(name)
         plt.show()
+
+def read_joint_angles(directory_name:str)->np.ndarray:
+    dofs_names = ['FF_TX','FF_TY','FF_TZ','FF_Rquat0','FF_Rquat1','FF_Rquat2','FF_Rquat3','L5S1_FE','RShoulder_FE','RShoulder_AA','RShoulder_RIE','RElbow_FE','RElbow_PS','RHip_FE','RHip_AA','RKnee_FE','RAnkle_FE']
+    q=[]
+    for name in dofs_names: 
+        q_i = np.loadtxt(directory_name+'/'+name+'.csv')
+        q.append(q_i)
+    
+    q=np.array(q)
+    return q

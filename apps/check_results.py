@@ -5,12 +5,12 @@ import sys
 import os
 parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.append(parent_dir)
-from utils.read_write_utils import read_lstm_data, get_lstm_mks_names, read_mocap_data, convert_to_list_of_dicts, plot_joint_angle_results
+from utils.read_write_utils import read_lstm_data, get_lstm_mks_names, read_mocap_data, convert_to_list_of_dicts, plot_joint_angle_results, read_joint_angles
 from utils.model_utils import get_subset_challenge_mks_names, get_segments_lstm_mks_dict_challenge, build_model_challenge
-from utils.viz_utils import place, visualize_joint_angle_results
+from utils.viz_utils import place, visualize_joint_angle_results, visualize_model_and_measurements
 
-subject = 'sujet_1'
-task = 'Marche'
+subject = 'sujet_2'
+task = 'Assis-debout'
 
 fichier_csv_lstm_mks = "data/"+subject+"/"+task+"/jcp_coordinates_ncameras_augmented.csv"
 results_directory = "results/calib_lstm/"+subject+"/"+task
@@ -58,4 +58,7 @@ for name, visual in visuals_dict.items():
 # Set color for other visual objects similarly
 data = model.createData()
 
-visualize_joint_angle_results(results_directory,viz,model)
+q = read_joint_angles(results_directory)
+visualize_model_and_measurements(model, q, lstm_mks_dict, seg_names_mks, 0.03, viz)
+
+# visualize_joint_angle_results(results_directory,viz,model)

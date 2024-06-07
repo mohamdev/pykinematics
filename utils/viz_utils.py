@@ -21,13 +21,15 @@ def visualize_joint_angle_results(directory_name:str, viz, model):
         print(q_ii)
         viz.display(q_ii)
         time.sleep(0.016)
-        
 
 
-def visualize_model_and_measurements(model: pin.Model, q: list, lstm_mks_dict: dict, seg_names_mks: dict, sleep_time: float, viz):
+def visualize_model_and_measurements(model: pin.Model, q: np.ndarray, lstm_mks_dict: dict, seg_names_mks: dict, sleep_time: float, viz):
     """    _Function to visualize model markers from q's and raw lstm markers from lstm_
     """
     data = model.createData()
+
+    viz.viewer.gui.addXYZaxis('world/base_frame', [255, 0., 0, 1.], 0.04, 0.2)
+    
     for seg_name, mks in seg_names_mks.items():
         viz.viewer.gui.addXYZaxis(f'world/{seg_name}', [255, 0., 0, 1.], 0.008, 0.08)
         for mk_name in mks:
@@ -36,10 +38,10 @@ def visualize_model_and_measurements(model: pin.Model, q: list, lstm_mks_dict: d
             viz.viewer.gui.addSphere(sphere_name_model, 0.01, [0, 0., 255, 1.])
             viz.viewer.gui.addSphere(sphere_name_raw, 0.01, [255, 0., 0, 1.])
 
-    for i in range(len(q)):
-        pin.forwardKinematics(model, data, q[i])
+    for i in range(q.shape[1]):
+        pin.forwardKinematics(model, data, q[:,i])
         pin.updateFramePlacements(model, data)
-
+        viz.display(q[:,i])
         for seg_name, mks in seg_names_mks.items():
             #Display markers from model
             for mk_name in mks:
