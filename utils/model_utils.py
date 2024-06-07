@@ -1,15 +1,8 @@
-import eigenpy
 import hppfcl as fcl
 import pinocchio as pin
-import sys
-from pinocchio.visualize import GepettoVisualizer
 import numpy as np
 from scipy.spatial.transform import Rotation as R
-import time
-from sklearn.preprocessing import normalize
 import pinocchio as pin
-from pinocchio.robot_wrapper import RobotWrapper
-from pinocchio.utils import *
 
 #Build inertia matrix from 6 inertia components
 def make_inertia_matrix(ixx, ixy, ixz, iyy, iyz, izz):
