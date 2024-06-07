@@ -108,3 +108,8 @@ def read_mocap_data(file_path: str)->Dict:
         mocap_mks_positions[landmark] = np.array(positions[3*i:3*i+3]).reshape(3,1)
     
     return mocap_mks_positions
+
+def write_joint_angle_results(directory_name: str, q:np.ndarray):
+    dofs_names = ['L5S1_FE','RShoulder_FE','RShoulder_AA','RShoulder_RIE','RElbow_FE','RElbow_PS','RHip_FE','RHip_AA','RKnee_FE','RAnkle_FE']
+    for ii in range(7,q.shape[1]):
+        np.savetxt(directory_name+'/'+dofs_names[ii]+'.csv', q[:,ii])
