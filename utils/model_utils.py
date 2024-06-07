@@ -490,8 +490,8 @@ def build_model_challenge(mocap_mks_positions: Dict, lstm_mks_positions: Dict, m
     #     print(("{:<24} : {: .2f} {: .2f} {: .2f}"
     #         .format( name, *oMi.translation.T.flat )))
 
-    model.upperPositionLimit[7:] = np.array([0.393,3.142,3.142,1.22,2.53, 1.57, 2.27,0.52,2.36,0.87])
-    model.lowerPositionLimit[7:] = np.array([-0.305,-1.047,-0.698,-1.57,0, -1.57, -0.52,-0.52,0,-0.35])
+    model.upperPositionLimit[7:] = np.array([0.305,3.142,3.142,1.22,2.53, 1.57, 0.52,0.52,0,0.35])
+    model.lowerPositionLimit[7:] = np.array([-0.393,-1.047,-0.698,-1.57,0, -1.57, -2.27,-0.52,-2.36,-0.87])
 
     return model, geom_model, visuals_dict
 
