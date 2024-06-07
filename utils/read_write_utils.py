@@ -1,6 +1,7 @@
 import pandas as pd 
 import numpy as np
 from typing import Dict, Tuple, List
+import matplotlib.pyplot as plt 
 
 def read_lstm_data(file_name: str)->Tuple[Dict, Dict]:
     """_Creates two dictionnaries, one containing the 3D positions of all the markers output by the LSTM, another to map the number of the marks to the JC associated_
@@ -110,6 +111,25 @@ def read_mocap_data(file_path: str)->Dict:
     return mocap_mks_positions
 
 def write_joint_angle_results(directory_name: str, q:np.ndarray):
+    """_Write the joint angles obtained from the ik as asked by the challenge moderators_
+
+    Args:
+        directory_name (str): _Name of the directory to store the results_
+        q (np.ndarray): _Joint angle results_
+    """
     dofs_names = ['L5S1_FE','RShoulder_FE','RShoulder_AA','RShoulder_RIE','RElbow_FE','RElbow_PS','RHip_FE','RHip_AA','RKnee_FE','RAnkle_FE']
     for ii in range(7,q.shape[1]):
-        np.savetxt(directory_name+'/'+dofs_names[ii]+'.csv', q[:,ii])
+        np.savetxt(directory_name+'/'+dofs_names[ii-7]+'.csv', q[:,ii])
+
+def plot_joint_angle_results(directory_name:str):
+    """_Plots the corresponding joint angles_
+
+    Args:
+        directory_name (str): _Directory name where the data to plot are stored_
+    """
+    dofs_names = ['L5S1_FE','RShoulder_FE','RShoulder_AA','RShoulder_RIE','RElbow_FE','RElbow_PS','RHip_FE','RHip_AA','RKnee_FE','RAnkle_FE']
+    for name in dofs_names: 
+        q_i = np.loadtxt(directory_name+'/'+name+'.csv')
+        plt.plot(q_i)
+        plt.title(name)
+        plt.show()
