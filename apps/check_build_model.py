@@ -50,7 +50,9 @@ for name, visual in visuals_dict.items():
 # Set color for other visual objects similarly
 data = model.createData()
 
-viz.display(pin.neutral(model))
+q0 = pin.neutral(model)
+
+viz.display(q0)
 
 # viz.viewer.gui.addXYZaxis('world/base_frame', [255, 0., 0, 1.], 0.02, 0.15)
 # place(viz, 'world/base_frame', pin.SE3(np.eye(3), np.matrix([0, 0, 0]).T))
@@ -62,7 +64,7 @@ for seg_name, mks in seg_names_mks.items():
         viz.viewer.gui.addSphere(sphere_name, 0.01, [0, 0., 255, 1.])
 
 
-pin.forwardKinematics(model, data, pin.neutral(model))
+pin.forwardKinematics(model, data, q0)
 pin.updateFramePlacements(model, data)
 
 for seg_name, mks in seg_names_mks.items():
