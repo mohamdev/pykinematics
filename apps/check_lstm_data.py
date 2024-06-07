@@ -10,8 +10,8 @@ from utils.read_write_utils import read_lstm_data,get_lstm_mks_names,read_mocap_
 from utils.model_utils import get_torso_pose,get_thigh_pose,get_foot_pose,get_pelvis_pose,get_shank_pose,get_upperarm_pose,get_lowerarm_pose
 from utils.viz_utils import place
 
-fichier_csv_lstm_mks = "../data/jcp_coordinates_ncameras_augmented.csv"
-fichier_csv_mocap_mks = "../data/mks_coordinates_3D.trc"
+fichier_csv_lstm_mks = "data/jcp_coordinates_ncameras_augmented.csv"
+fichier_csv_mocap_mks = "data/mks_coordinates_3D.trc"
 lstm_mks_dict, mapping = read_lstm_data(fichier_csv_lstm_mks)
 lstm_mks_names = get_lstm_mks_names(fichier_csv_lstm_mks)
 mocap_mks_dict = read_mocap_data(fichier_csv_mocap_mks)

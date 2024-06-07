@@ -330,8 +330,12 @@ def build_model_challenge(mocap_mks_positions, lstm_mks_positions, meshes_folder
     # Add markers data
     idx_frame = IDX_PELV_SF
     for i in sgts_mks_dict["pelvis"]:
-        frame = pin.Frame(i,IDX_PELV_JF,idx_frame,pin.SE3(np.eye(3,3), np.matrix(lstm_mks_local_positions[i]).T),pin.FrameType.OP_FRAME, inertia) # à remplacer par VIMU_TRUNK
+        frame = pin.Frame(i,IDX_PELV_JF,idx_frame,pin.SE3(np.eye(3,3), np.matrix(lstm_mks_local_positions[i]).T),pin.FrameType.OP_FRAME, inertia) 
         idx_frame = model.addFrame(frame,False)
+    
+    pelvis_visual = pin.GeometryObject('pelvis', IDX_PELV_SF, IDX_PELV_JF, mesh_loader.load(meshes_folder_path+'/pelvis_mesh.STL'), pin.SE3(rtorso.as_matrix(), np.matrix([-0.15, -0.17, 0.13]).T), meshes_folder_path+'/pelvis_mesh.STL', np.array([0.0065, 0.0065, 0.0065]), False, np.array([0, 1, 1, 1]))
+    geom_model.addGeometryObject(pelvis_visual)
+    visuals_dict["pelvis"] = pelvis_visual
 
     # Lombaire L5-S1 flexion/extension
     IDX_L5S1_JF = model.addJoint(IDX_PELV_JF,pin.JointModelRZ(),pin.SE3(np.eye(3), np.matrix([0, 0, 0]).T),'L5S1_FE') 
@@ -339,12 +343,16 @@ def build_model_challenge(mocap_mks_positions, lstm_mks_positions, meshes_folder
     IDX_TORSO_SF = model.addFrame(torso,False)
     idx_frame = IDX_TORSO_SF
     for i in sgts_mks_dict["torso"]:
-        frame = pin.Frame(i,IDX_L5S1_JF,idx_frame,pin.SE3(np.eye(3,3), np.matrix(lstm_mks_local_positions[i]+ local_segments_positions['torso']).T),pin.FrameType.OP_FRAME, inertia) # à remplacer par VIMU_TRUNK
+        frame = pin.Frame(i,IDX_L5S1_JF,idx_frame,pin.SE3(np.eye(3,3), np.matrix(lstm_mks_local_positions[i]+ local_segments_positions['torso']).T),pin.FrameType.OP_FRAME, inertia) 
         idx_frame = model.addFrame(frame,False)
 
     torso_visual = pin.GeometryObject('torso', IDX_TORSO_SF, IDX_L5S1_JF, mesh_loader.load(meshes_folder_path+'/torso_mesh.STL'), pin.SE3(rtorso.as_matrix(), np.matrix([-0.15, 0.17, 0.13]).T), meshes_folder_path+'/torso_mesh.STL', np.array([0.0065, 0.0065, 0.0065]), False, np.array([0, 1, 1, 1]))
     geom_model.addGeometryObject(torso_visual)
     visuals_dict["torso"] = torso_visual
+
+    abdomen_visual = pin.GeometryObject('abdomen', IDX_TORSO_SF, IDX_L5S1_JF, mesh_loader.load(meshes_folder_path+'/abdomen_mesh.STL'), pin.SE3(rtorso.as_matrix(), np.matrix([-0.12, 0.05, 0.09]).T), meshes_folder_path+'/abdomen_mesh.STL', np.array([0.0065, 0.0065, 0.0065]), False, np.array([0, 1, 1, 1]))
+    geom_model.addGeometryObject(abdomen_visual)
+    visuals_dict["abdomen"] = abdomen_visual
 
     # Shoulder YXY
     IDX_SH_Y1_JF = model.addJoint(IDX_L5S1_JF,pin.JointModelRY(),pin.SE3(np.eye(3), np.matrix(local_segments_positions['upperarm'] + local_segments_positions['torso']).T),'Shoulder_Y1') 
@@ -366,7 +374,7 @@ def build_model_challenge(mocap_mks_positions, lstm_mks_positions, meshes_folder
     IDX_UPA_SF = model.addFrame(upperarm,False)
     idx_frame = IDX_UPA_SF
     for i in sgts_mks_dict["upperarm"]:
-        frame = pin.Frame(i,IDX_SH_Y_JF,idx_frame,pin.SE3(np.eye(3,3), np.matrix(lstm_mks_local_positions[i]).T),pin.FrameType.OP_FRAME, inertia) # à remplacer par VIMU_TRUNK
+        frame = pin.Frame(i,IDX_SH_Y_JF,idx_frame,pin.SE3(np.eye(3,3), np.matrix(lstm_mks_local_positions[i]).T),pin.FrameType.OP_FRAME, inertia) 
         idx_frame = model.addFrame(frame,False)
 
     upperarm_visual = pin.GeometryObject('upperarm', IDX_UPA_SF, IDX_SH_Y_JF, mesh_loader.load(meshes_folder_path+'/upperarm_mesh.STL'), pin.SE3(np.eye(3), np.matrix([-0.18, -0.27, -0.06]).T), meshes_folder_path+'/upperarm_mesh.STL',np.array([0.0063, 0.0060, 0.007]), False , np.array([0,1,1,0.5]))
@@ -389,7 +397,7 @@ def build_model_challenge(mocap_mks_positions, lstm_mks_positions, meshes_folder
     idx_frame = IDX_LOA_SF
 
     for i in sgts_mks_dict["lowerarm"]:
-        frame = pin.Frame(i,IDX_EL_Y_JF,idx_frame,pin.SE3(np.eye(3,3), np.matrix(lstm_mks_local_positions[i]).T),pin.FrameType.OP_FRAME, inertia) # à remplacer par VIMU_TRUNK
+        frame = pin.Frame(i,IDX_EL_Y_JF,idx_frame,pin.SE3(np.eye(3,3), np.matrix(lstm_mks_local_positions[i]).T),pin.FrameType.OP_FRAME, inertia) 
         idx_frame = model.addFrame(frame,False)
 
     lowerarm_visual = pin.GeometryObject('lowerarm',IDX_LOA_SF, IDX_EL_Y_JF, mesh_loader.load(meshes_folder_path+'/lowerarm_mesh.STL'), pin.SE3(np.eye(3), np.matrix([-0.17, -0.25, -0.045]).T), meshes_folder_path+'/lowerarm_mesh.STL',np.array([0.0060, 0.0060, 0.0060]), False , np.array([0,1,1,0.5]))
@@ -409,8 +417,12 @@ def build_model_challenge(mocap_mks_positions, lstm_mks_positions, meshes_folder
     idx_frame = IDX_THIGH_SF
 
     for i in sgts_mks_dict["thigh"]:
-        frame = pin.Frame(i,IDX_HIP_X_JF,idx_frame,pin.SE3(np.eye(3,3), np.matrix(lstm_mks_local_positions[i]).T),pin.FrameType.OP_FRAME, inertia) # à remplacer par VIMU_TRUNK
+        frame = pin.Frame(i,IDX_HIP_X_JF,idx_frame,pin.SE3(np.eye(3,3), np.matrix(lstm_mks_local_positions[i]).T),pin.FrameType.OP_FRAME, inertia) 
         idx_frame = model.addFrame(frame,False)
+
+    upperleg_visual = pin.GeometryObject('upperleg',IDX_THIGH_SF, IDX_HIP_Z_JF, mesh_loader.load(meshes_folder_path+'/upperleg_mesh.STL'), pin.SE3(np.eye(3), np.matrix([-0.13, -0.37, -0.045]).T), meshes_folder_path+'/upperleg_mesh.STL',np.array([0.0060, 0.0060, 0.0060]), False , np.array([0,1,1,0.5]))
+    geom_model.addGeometryObject(upperleg_visual)
+    visuals_dict["upperleg"] = upperleg_visual
 
 
     # Knee Z
@@ -420,8 +432,16 @@ def build_model_challenge(mocap_mks_positions, lstm_mks_positions, meshes_folder
     idx_frame = IDX_SHANK_SF
 
     for i in sgts_mks_dict["shank"]:
-        frame = pin.Frame(i,IDX_KNEE_Z_JF,idx_frame,pin.SE3(np.eye(3,3), np.matrix(lstm_mks_local_positions[i]).T),pin.FrameType.OP_FRAME, inertia) # à remplacer par VIMU_TRUNK
+        frame = pin.Frame(i,IDX_KNEE_Z_JF,idx_frame,pin.SE3(np.eye(3,3), np.matrix(lstm_mks_local_positions[i]).T),pin.FrameType.OP_FRAME, inertia) 
         idx_frame = model.addFrame(frame,False)
+    
+    knee_visual = pin.GeometryObject('knee',IDX_SHANK_SF, IDX_KNEE_Z_JF, mesh_loader.load(meshes_folder_path+'/knee_mesh.STL'), pin.SE3(np.eye(3), np.matrix([-0.13, 0, -0.015]).T), meshes_folder_path+'/knee_mesh.STL',np.array([0.0060, 0.0060, 0.0060]), False , np.array([0,1,1,0.5]))
+    geom_model.addGeometryObject(knee_visual)
+    visuals_dict["knee"] = knee_visual
+
+    lowerleg_visual = pin.GeometryObject('lowerleg',IDX_SHANK_SF, IDX_KNEE_Z_JF, mesh_loader.load(meshes_folder_path+'/lowerleg_mesh.STL'), pin.SE3(np.eye(3), np.matrix([-0.13, -0.40, -0.045]).T), meshes_folder_path+'/lowerleg_mesh.STL',np.array([0.0060, 0.0060, 0.0060]), False , np.array([0,1,1,0.5]))
+    geom_model.addGeometryObject(lowerleg_visual)
+    visuals_dict["lowerleg"] = lowerleg_visual
 
     # Ankle Z
     IDX_ANKLE_Z_JF = model.addJoint(IDX_KNEE_Z_JF,pin.JointModelRZ(),pin.SE3(np.eye(3), np.matrix(local_segments_positions['foot']).T),'Ankle_Z') 
@@ -430,8 +450,12 @@ def build_model_challenge(mocap_mks_positions, lstm_mks_positions, meshes_folder
     idx_frame = IDX_SFOOT_SF
 
     for i in sgts_mks_dict["foot"]:
-        frame = pin.Frame(i,IDX_ANKLE_Z_JF,idx_frame,pin.SE3(np.eye(3,3), np.matrix(lstm_mks_local_positions[i]).T),pin.FrameType.OP_FRAME, inertia) # à remplacer par VIMU_TRUNK
+        frame = pin.Frame(i,IDX_ANKLE_Z_JF,idx_frame,pin.SE3(np.eye(3,3), np.matrix(lstm_mks_local_positions[i]).T),pin.FrameType.OP_FRAME, inertia) 
         idx_frame = model.addFrame(frame,False)
+    
+    foot_visual = pin.GeometryObject('foot',IDX_SFOOT_SF, IDX_ANKLE_Z_JF, mesh_loader.load(meshes_folder_path+'/foot_mesh.STL'), pin.SE3(rupperarm.as_matrix(), np.matrix([-0.11, -0.07, 0.09]).T), meshes_folder_path+'/foot_mesh.STL',np.array([0.0060, 0.0060, 0.0060]), False , np.array([0,1,1,0.5]))
+    geom_model.addGeometryObject(foot_visual)
+    visuals_dict["foot"] = foot_visual
 
     # data     = model.createData()
     # # Sample a random configuration
