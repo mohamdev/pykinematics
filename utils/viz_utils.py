@@ -1,5 +1,6 @@
 import pinocchio as pin
 import numpy as np
+import time 
 
 def place(viz, name, M):
     viz.viewer.gui.applyConfiguration(name, pin.SE3ToXYZQUAT(M).tolist())
@@ -13,11 +14,14 @@ def visualize_joint_angle_results(directory_name:str, viz, model):
         q.append(q_i)
     
     q=np.array(q)
+    print(q.shape)
+    input()
 
-    for ii in range(q.shape[0]):
+    for ii in range(q.shape[1]):
         q_ii=pin.neutral(model)
-        q_ii[7:]=q[ii,:]
+        q_ii[7:]=q[:,ii]
         viz.display(q_ii)
         input()
+        
 
 
