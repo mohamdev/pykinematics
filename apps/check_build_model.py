@@ -7,11 +7,11 @@ parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.append(parent_dir)
 from utils.read_write_utils import read_lstm_data, get_lstm_mks_names, read_mocap_data, convert_to_list_of_dicts
 from utils.model_utils import get_subset_challenge_mks_names, get_segments_lstm_mks_dict_challenge, build_model_challenge
-from utils.viz_utils import place
+from utils.viz_utils import place, visualize_model_and_measurements
 
-fichier_csv_lstm_mks = "data/jcp_coordinates_ncameras_augmented.csv"
-fichier_csv_mocap_mks = "data/mks_coordinates_3D.trc"
-meshes_folder_path = "meshes/" #Changes le par ton folder de meshes
+fichier_csv_lstm_mks = "../data/jcp_coordinates_ncameras_augmented.csv"
+fichier_csv_mocap_mks = "../data/mks_coordinates_3D.trc"
+meshes_folder_path = "../meshes/" #Changes le par ton folder de meshes
 
 #Read data
 lstm_mks_dict, mapping = read_lstm_data(fichier_csv_lstm_mks)
@@ -44,8 +44,8 @@ except AttributeError as err:
     print(err)
     sys.exit(0)
 
-for name, visual in visuals_dict.items():
-    viz.viewer.gui.setColor(viz.getViewerNodeName(visual, pin.GeometryType.VISUAL), [0, 1, 1, 0.5])
+# for name, visual in visuals_dict.items():
+#     viz.viewer.gui.setColor(viz.getViewerNodeName(visual, pin.GeometryType.VISUAL), [0, 1, 1, 0.5])
 
 # Set color for other visual objects similarly
 data = model.createData()
@@ -58,28 +58,37 @@ q0 = np.array([ 1.67756366,  0.95857549, -0.3268217 , -0.0952691 ,  0.98975702, 
 
 viz.display(q0)
 
-# viz.viewer.gui.addXYZaxis('world/base_frame', [255, 0., 0, 1.], 0.02, 0.15)
-# place(viz, 'world/base_frame', pin.SE3(np.eye(3), np.matrix([0, 0, 0]).T))
+q = []
+print(lstm_mks_dict[0])
+for i in range(len(lstm_mks_dict)):
+    q.append(q0)
 
-for seg_name, mks in seg_names_mks.items():
-    viz.viewer.gui.addXYZaxis(f'world/{seg_name}', [255, 0., 0, 1.], 0.008, 0.08)
-    for mk_name in mks:
-        sphere_name = f'world/{mk_name}'
-        viz.viewer.gui.addSphere(sphere_name, 0.01, [0, 0., 255, 1.])
+sleep_time = 0.05
+visualize_model_and_measurements(model, q, lstm_mks_dict, seg_names_mks, sleep_time, viz)
 
 
-pin.forwardKinematics(model, data, q0)
-pin.updateFramePlacements(model, data)
+# # viz.viewer.gui.addXYZaxis('world/base_frame', [255, 0., 0, 1.], 0.02, 0.15)
+# # place(viz, 'world/base_frame', pin.SE3(np.eye(3), np.matrix([0, 0, 0]).T))
 
-for seg_name, mks in seg_names_mks.items():
-    #Display markers from model
-    for mk_name in mks:
-        sphere_name = f'world/{mk_name}'
-        mk_position = data.oMf[model.getFrameId(mk_name)].translation
-        place(viz, sphere_name, pin.SE3(np.eye(3), np.matrix(mk_position.reshape(3,)).T))
+# for seg_name, mks in seg_names_mks.items():
+#     viz.viewer.gui.addXYZaxis(f'world/{seg_name}', [255, 0., 0, 1.], 0.008, 0.08)
+#     for mk_name in mks:
+#         sphere_name = f'world/{mk_name}'
+#         viz.viewer.gui.addSphere(sphere_name, 0.01, [0, 0., 255, 1.])
+
+
+# pin.forwardKinematics(model, data, q0)
+# pin.updateFramePlacements(model, data)
+
+# for seg_name, mks in seg_names_mks.items():
+#     #Display markers from model
+#     for mk_name in mks:
+#         sphere_name = f'world/{mk_name}'
+#         mk_position = data.oMf[model.getFrameId(mk_name)].translation
+#         place(viz, sphere_name, pin.SE3(np.eye(3), np.matrix(mk_position.reshape(3,)).T))
     
-    #Display frames from model
-    frame_name = f'world/{seg_name}'
-    frame_se3= data.oMf[model.getFrameId(seg_name)]
-    place(viz, frame_name, frame_se3)
+#     #Display frames from model
+#     frame_name = f'world/{seg_name}'
+#     frame_se3= data.oMf[model.getFrameId(seg_name)]
+#     place(viz, frame_name, frame_se3)
         
