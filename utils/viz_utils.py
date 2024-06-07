@@ -25,3 +25,34 @@ def visualize_joint_angle_results(directory_name:str, viz, model):
         
 
 
+def visualize_model_and_measurements(model: pin.Model, q: list, lstm_mks_dict: dict, seg_names_mks: dict, sleep_time: float, viz):
+    """    _Function to visualize model markers from q's and raw lstm markers from lstm_
+    """
+    data = model.createData()
+    for seg_name, mks in seg_names_mks.items():
+        viz.viewer.gui.addXYZaxis(f'world/{seg_name}', [255, 0., 0, 1.], 0.008, 0.08)
+        for mk_name in mks:
+            sphere_name_model = f'world/{mk_name}_model'
+            sphere_name_raw = f'world/{mk_name}_raw'
+            viz.viewer.gui.addSphere(sphere_name_model, 0.01, [0, 0., 255, 1.])
+            viz.viewer.gui.addSphere(sphere_name_raw, 0.01, [255, 0., 0, 1.])
+
+    for i in range(len(q)):
+        pin.forwardKinematics(model, data, q[i])
+        pin.updateFramePlacements(model, data)
+
+        for seg_name, mks in seg_names_mks.items():
+            #Display markers from model
+            for mk_name in mks:
+                sphere_name_model = f'world/{mk_name}_model'
+                sphere_name_raw = f'world/{mk_name}_raw'
+                mk_position = data.oMf[model.getFrameId(mk_name)].translation
+                place(viz, sphere_name_model, pin.SE3(np.eye(3), np.matrix(mk_position.reshape(3,)).T))
+                place(viz, sphere_name_raw, pin.SE3(np.eye(3), np.matrix(lstm_mks_dict[i][mk_name].reshape(3,)).T))
+            
+            #Display frames from model
+            frame_name = f'world/{seg_name}'
+            frame_se3= data.oMf[model.getFrameId(seg_name)]
+            place(viz, frame_name, frame_se3)
+        time.sleep(sleep_time)
+        
