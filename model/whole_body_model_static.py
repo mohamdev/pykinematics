@@ -1,5 +1,5 @@
-from model_utils import *
-from viz_utils import *
+from utils.model_utils import *
+from utils.viz_utils import *
 
 # MODEL GENERATION 
 
