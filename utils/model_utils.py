@@ -12,6 +12,17 @@ from sklearn.preprocessing import normalize
 def make_inertia_matrix(ixx, ixy, ixz, iyy, iyz, izz):
     return np.array([[ixx, ixy, ixz], [ixy, iyy, iyz], [ixz, iyz, izz]])
 
+def orthogonalize_matrix(matrix):
+    # Perform Singular Value Decomposition
+    U, _, Vt = np.linalg.svd(matrix)
+    # Reconstruct the orthogonal matrix
+    orthogonal_matrix = U @ Vt
+    # Ensure the determinant is 1
+    if np.linalg.det(orthogonal_matrix) < 0:
+        U[:, -1] *= -1
+        orthogonal_matrix = U @ Vt
+    return orthogonal_matrix
+
 
 #construct torso frame and get its pose from a dictionnary of mks positions and names
 def get_torso_pose(mocap_mks_positions):
@@ -29,7 +40,7 @@ def get_torso_pose(mocap_mks_positions):
     pose[:3,1] = Y.reshape(3,)
     pose[:3,2] = Z.reshape(3,)
     pose[:3,3] = trunk_center.reshape(3,)
-
+    pose[:3,:3] = orthogonalize_matrix(pose[:3,:3])
     return pose
 
 #construct upperarm frame and get its pose
@@ -49,6 +60,7 @@ def get_upperarm_pose(mocap_mks_positions):
     pose[:3,1] = Y.reshape(3,)
     pose[:3,2] = Z.reshape(3,)
     pose[:3,3] = shoulder_center.reshape(3,)
+    pose[:3,:3] = orthogonalize_matrix(pose[:3,:3])
 
     return pose
 
@@ -69,6 +81,7 @@ def get_lowerarm_pose(mocap_mks_positions):
     pose[:3,1] = Y.reshape(3,)
     pose[:3,2] = Z.reshape(3,)
     pose[:3,3] = elbow_center.reshape(3,)
+    pose[:3,:3] = orthogonalize_matrix(pose[:3,:3])
     return pose
 
 #construct pelvis frame and get its pose
@@ -90,6 +103,7 @@ def get_pelvis_pose(mocap_mks_positions):
     pose[:3,1] = Y.reshape(3,)
     pose[:3,2] = Z.reshape(3,)
     pose[:3,3] = ((center_right_ASIS_PSIS + center_left_ASIS_PSIS)/2.0).reshape(3,)
+    pose[:3,:3] = orthogonalize_matrix(pose[:3,:3])
 
     return pose
 
@@ -110,6 +124,7 @@ def get_thigh_pose(mocap_mks_positions):
     pose[:3,1] = Y.reshape(3,)
     pose[:3,2] = Z.reshape(3,)
     pose[:3,3] = hip_center.reshape(3,)
+    pose[:3,:3] = orthogonalize_matrix(pose[:3,:3])
 
     return pose
 
@@ -131,6 +146,7 @@ def get_shank_pose(mocap_mks_positions):
     pose[:3,1] = Y.reshape(3,)
     pose[:3,2] = Z.reshape(3,)
     pose[:3,3] = knee_center.reshape(3,)
+    pose[:3,:3] = orthogonalize_matrix(pose[:3,:3])
     return pose
 
 #construct foot frame and get its pose
@@ -150,6 +166,7 @@ def get_foot_pose(mocap_mks_positions):
     pose[:3,1] = Y.reshape(3,)
     pose[:3,2] = Z.reshape(3,)
     pose[:3,3] = ankle_center.reshape(3,)
+    pose[:3,:3] = orthogonalize_matrix(pose[:3,:3])
     return pose
 
 
@@ -176,7 +193,8 @@ def construct_segments_frames_challenge(mocap_mks_positions):
         "shank": shank_pose,
         "foot": foot_pose
     }
-    
+    for name, pose in sgts_poses.items():
+        print(name, " rot det : ", np.linalg.det(pose[:3,:3]))
     return sgts_poses
 
 def get_segments_lstm_mks_dict_challenge():
@@ -200,7 +218,36 @@ def get_segments_lstm_mks_dict_challenge():
 # - sgts_mks_dict a dictionnary containing the segments names, and the corresponding list of lstm mks names attached to the segment
 # - returns a dictionnary of lstm mks names and their 3x1 local positions 
 def get_local_lstm_mks_positions(sgts_poses, lstm_mks_positions, sgts_mks_dict):
-    lstm_mks_local_positions = []
+    lstm_mks_local_positions = {}
+
+    for segment, markers in sgts_mks_dict.items():
+        # Get the segment's transformation matrix
+        segment_pose = sgts_poses[segment]
+        
+        # Compute the inverse of the segment's transformation matrix
+        segment_pose_inv = np.eye(4,4)
+        segment_pose_inv[:3,:3] = np.transpose(segment_pose[:3,:3])
+        segment_pose_inv[:3,3] = -np.transpose(segment_pose[:3,:3]) @ segment_pose[:3,3]
+        for marker in markers:
+            if marker in lstm_mks_positions:
+                # Get the marker's global position
+                marker_global_pos = np.append(lstm_mks_positions[marker], 1)  # Convert to homogeneous coordinates
+
+
+                marker_local_pos_hom = segment_pose_inv @ marker_global_pos  # Transform to local coordinates
+                marker_local_pos = marker_local_pos_hom[:3]  # Convert back to 3x1 coordinates
+
+                if marker == 'RShoulder':
+                    print("segment:", segment)
+                    print("position:", marker_global_pos[:3] )
+                    print("torso position:", segment_pose[:3,3])
+                    print("torso to RShoulder:", marker_global_pos[:3] - segment_pose[:3,3])
+                    print("local pos: ", marker_local_pos)
+                    print("rot det :", np.linalg.det(segment_pose_inv[:3,:3]))
+
+                # Store the local position in the dictionary
+                lstm_mks_local_positions[marker] = marker_local_pos
+
     return lstm_mks_local_positions
 
 #Build model

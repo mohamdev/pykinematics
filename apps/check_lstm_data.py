@@ -14,9 +14,6 @@ lstm_mks_names = get_lstm_mks_names(fichier_csv_lstm_mks)
 mocap_mks_dict = read_mocap_data(fichier_csv_mocap_mks)
 lstm_mks_dict = convert_to_list_of_dicts(lstm_mks_dict)
 
-
-# print(lstm_mks_dict)
-
 viz = GepettoVisualizer()
 
 try:
@@ -49,7 +46,7 @@ for name in lstm_mks_names:
     viz.viewer.gui.addSphere(sphere_name, 0.015, [0, 0., 255, 1.])
 
 # Iterate over all points in first sample of lstm_mks_dict and add them to the viewer
-for i in range(len(lstm_mks_dict)):
+for i in range(1):
 # for i in range(25):
     torso_pose = get_torso_pose(lstm_mks_dict[i])
     upperarm_pose = get_upperarm_pose(lstm_mks_dict[i])
