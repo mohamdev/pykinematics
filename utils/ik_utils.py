@@ -23,14 +23,17 @@ class IK_Casadi:
         cpin.framesForwardKinematics(self._cmodel, self._cdata, cq)
 
         cfunction_list = []
+        self._new_key_list = [] # Only take the frames that are in the model 
+
         for key in self._keys_list:
             index_mk = self._cmodel.getFrameId(key)
             if index_mk < len(self._model.frames.tolist()): # Check that the frame is in the model
                 new_key = key.replace('.','')
+                self._new_key_list.append(key)
                 function_mk = casadi.Function(f'f_{new_key}',[cq],[self._cdata.oMf[index_mk].translation])
                 cfunction_list.append(function_mk)
 
-        self._cfunction_dict=dict(zip(self._keys_list,cfunction_list))
+        self._cfunction_dict=dict(zip(self._new_key_list,cfunction_list))
         
     def create_meas_list(self)-> List[Dict]:
         d_list = []
