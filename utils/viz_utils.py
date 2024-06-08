@@ -56,4 +56,37 @@ def visualize_model_and_measurements(model: pin.Model, q: np.ndarray, lstm_mks_d
             frame_se3= data.oMf[model.getFrameId(seg_name)]
             place(viz, frame_name, frame_se3)
         time.sleep(sleep_time)
-        
+
+
+def vizualise_triangulated_landmarks(jcps_dict: dict, nb_frames: int, sleep_time: float, viz):
+    """    _Function to visualize model markers from q's and raw lstm markers from lstm_
+    """
+    viz.viewer.gui.addXYZaxis('world/base_frame', [255, 0., 0, 1.], 0.04, 0.2)
+    
+    for name, pos in jcps_dict.items():
+        sphere_name = f'world/{name}_model'
+        viz.viewer.gui.addSphere(sphere_name, 0.01, [0, 0., 255, 1.])
+
+    for i in range(nb_frames):
+        for name, pos in jcps_dict.items():
+            sphere_name = f'world/{name}_model'
+            place(viz, sphere_name, pin.SE3(np.eye(3), np.matrix(jcps_dict[name][i].reshape(3,)).T))
+        time.sleep(sleep_time)
+
+# def vizualise_triangulated_landmarks_and_lstm(jcps_dict: dict, nb_frames: int, sleep_time: float, viz):
+#     """    _Function to visualize model markers from q's and raw lstm markers from lstm_
+#     """
+
+#     viz.viewer.gui.addXYZaxis('world/base_frame', [255, 0., 0, 1.], 0.04, 0.2)
+    
+#     for name, pos in jcps_dict.items():
+#         sphere_name = f'world/{name}_model'
+#         viz.viewer.gui.addSphere(sphere_name, 0.01, [0, 0., 255, 1.])
+
+#     for i in range(nb_frames):
+#         for name, pos in jcps_dict.items():
+#             sphere_name = f'world/{name}_model'
+#             print(sphere_name)
+#             print(jcps_dict[name][i].reshape(3,))
+#             place(viz, sphere_name, pin.SE3(np.eye(3), np.matrix(jcps_dict[name][i].reshape(3,)).T))
+#         time.sleep(sleep_time)
