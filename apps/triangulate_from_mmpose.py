@@ -2,9 +2,10 @@ from utils.triangulation_utils import *
 from utils.read_write_utils import *
 from utils.linear_algebra_utils import *
 
+mmpose_model="body26"
 no_sujet="1"
-trial="exotique"
-trial_folder = "Exotique"
+trial="marche"
+trial_folder = "Marche"
 
 liste_fichiers = [
     f'./data/sujet_{no_sujet}/{trial_folder}/result_{trial}_26585_sujet{no_sujet}.txt',
@@ -25,11 +26,15 @@ for fichier in liste_fichiers :
 print(len(donnees_cameras), 'caméras sont utilisées pour cette triangulation')
 
 # Nombre de points joints (JCP)
-nombre_points = 26
+if mmpose_model=='body26':
+    nombre_points = 26
+else:
+    nombre_points = 133
 
 uvs=[]
 for donnee_camera in donnees_cameras:
     uvs_camera = np.array([[ligne[2*i], ligne[2*i + 1]] for ligne in donnee_camera for i in range(nombre_points)])
+    # uvs_camera = low_pass_filter_data(uvs_camera)
     uvs_camera = uvs_camera.reshape(-1, nombre_points, 2)
     uvs.append(uvs_camera)
 
@@ -74,12 +79,36 @@ for fichier in liste_fichiers:
 
 
 scores = read_mmpose_scores(liste_fichiers)
-threshold = 0.8
+threshold = 0.7
 p3ds_frames = triangulate_points_adaptive(uvs, mtxs, dists, projections, scores, threshold)
-p3ds_frames = low_pass_filter_data(p3ds_frames)
+p3ds_frames = butterworth_filter(p3ds_frames, 5.0)
 # p3ds_frames = triangulate_points(uvs, mtxs, dists, projections)
 
-joints_trc = ['nose', 'left_eye', 'right_eye', 'left_ear', 'right_ear', 'left_shoulder', 'right_shoulder', 'left_elbow', 'right_elbow', 'left_wrist', 'right_wrist', 'left_hip', 'right_hip', 'left_knee', 'right_knee', 'left_ankle', 'right_ankle', 'head', 'neck', 'hip', 'left_big_toe', 'right_big_toe', 'left_small_toe', 'right_small_toe', 'left_heel', 'right_heel']
+if mmpose_model == 'body26':
+    joints_trc = ['nose', 'left_eye', 'right_eye', 'left_ear', 'right_ear', 'left_shoulder', 'right_shoulder', 'left_elbow', 'right_elbow', 'left_wrist', 'right_wrist', 'left_hip', 'right_hip', 'left_knee', 'right_knee', 'left_ankle', 'right_ankle', 'head', 'neck', 'hip', 'left_big_toe', 'right_big_toe', 'left_small_toe', 'right_small_toe', 'left_heel', 'right_heel']
+else:
+    joints_trc = [
+        "Nose", "left_eye", "right_eye", "left_ear", "right_ear", 
+        "left_shoulder", "right_shoulder", "left_elbow", "right_elbow", 
+        "left_wrist", "right_wrist", "left_hip", "right_hip", 
+        "left_knee", "right_knee", "left_ankle", "right_ankle", 
+        "left_big_toe", "left_small_toe", "left_heel", 
+        "right_big_toe", "right_small_toe", "right_heel",
+        "face-0", "face-1", "face-2", "face-3", "face-4", "face-5", 
+        "face-6", "face-7", "face-8", "face-9", "face-10", "face-11", 
+        "face-12", # Continue for face points up to face-67
+        *["face-" + str(i) for i in range(13, 68)],
+        "left_hand_root", "left_thumb1", "left_thumb2", "left_thumb3", "left_thumb4",
+        "left_forefinger1", "left_forefinger2", "left_forefinger3", "left_forefinger4",
+        "left_middle_finger1", "left_middle_finger2", "left_middle_finger3", "left_middle_finger4",
+        "left_ring_finger1", "left_ring_finger2", "left_ring_finger3", "left_ring_finger4",
+        "left_pinky_finger1", "left_pinky_finger2", "left_pinky_finger3", "left_pinky_finger4",
+        "right_hand_root", "right_thumb1", "right_thumb2", "right_thumb3", "right_thumb4",
+        "right_forefinger1", "right_forefinger2", "right_forefinger3", "right_forefinger4",
+        "right_middle_finger1", "right_middle_finger2", "right_middle_finger3", "right_middle_finger4",
+        "right_ring_finger1", "right_ring_finger2", "right_ring_finger3", "right_ring_finger4",
+        "right_pinky_finger1", "right_pinky_finger2", "right_pinky_finger3", "right_pinky_finger4"
+    ]
 
 # Écrire les résultats dans un fichier TRC
 with open(f'./data/sujet_{no_sujet}/{trial_folder}/jcp_coordinates_ncameras.trc', 'w') as f:

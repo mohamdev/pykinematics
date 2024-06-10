@@ -11,8 +11,8 @@ from utils.model_utils import get_torso_pose,get_thigh_pose,get_foot_pose,get_pe
 from utils.viz_utils import place, vizualise_triangulated_landmarks
 
 no_sujet="1"
-trial="exotique"
-trial_folder = "Exotique"
+trial="marche"
+trial_folder = "Marche"
 
 fichier_csv_lstm_mks = f'./data/sujet_{no_sujet}/{trial_folder}/jcp_coordinates_ncameras.trc'
 joints_pos_dict, nb_samples = read_joint_positions(fichier_csv_lstm_mks)

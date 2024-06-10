@@ -4,6 +4,8 @@ import numpy as np
 from scipy.spatial.transform import Rotation as R
 import pinocchio as pin
 from typing import List, Tuple, Dict
+from utils.linear_algebra_utils import col_vector_3D
+from scipy.spatial.transform import Rotation as R
 
 #Build inertia matrix from 6 inertia components
 def make_inertia_matrix(ixx:float, ixy:float, ixz:float, iyy:float, iyz:float, izz:float)->np.ndarray:
@@ -26,14 +28,24 @@ def orthogonalize_matrix(matrix:np.ndarray)->np.ndarray:
 #construct torso frame and get its pose from a dictionnary of mks positions and names
 def get_torso_pose(mocap_mks_positions):
     pose = np.eye(4,4)
-    trunk_center = mocap_mks_positions['Neck']
-    
-    Y = (mocap_mks_positions['Neck'] - mocap_mks_positions['midHip']).reshape(3,1)
-    Y = Y/np.linalg.norm(Y)
-    X = (mocap_mks_positions['Neck'] - mocap_mks_positions['C7_study']).reshape(3,1)
-    X = X/np.linalg.norm(Y)
-    Z = np.cross(X, Y, axis=0)
-    X = np.cross(Y, Z, axis=0)
+    X, Y, Z, trunk_center = [], [], [], []
+    if 'Neck' in mocap_mks_positions:
+        trunk_center = mocap_mks_positions['Neck']
+        Y = (mocap_mks_positions['Neck'] - mocap_mks_positions['midHip']).reshape(3,1)
+        Y = Y/np.linalg.norm(Y)
+        X = (mocap_mks_positions['Neck'] - mocap_mks_positions['C7_study']).reshape(3,1)
+        X = X/np.linalg.norm(X)
+        Z = np.cross(X, Y, axis=0)
+        X = np.cross(Y, Z, axis=0)
+    else:
+        trunk_center = ((mocap_mks_positions['CV7'] + mocap_mks_positions['SJN'])/2.0).reshape(3,1)
+        Y = ((mocap_mks_positions['HeadR'] + mocap_mks_positions['HeadL'])/2.0 - mocap_mks_positions['SJN']).reshape(3,1)
+        Y = Y/np.linalg.norm(Y)
+        Z = (mocap_mks_positions['RSAT'] - mocap_mks_positions['LSAT']).reshape(3,1)
+        Z = Z/np.linalg.norm(Z)
+        X = np.cross(Y, Z, axis=0)
+        Y = np.cross(Z, X, axis=0)
+
 
     pose[:3,0] = X.reshape(3,)
     pose[:3,1] = Y.reshape(3,)
@@ -45,15 +57,28 @@ def get_torso_pose(mocap_mks_positions):
 #construct upperarm frame and get its pose
 def get_upperarm_pose(mocap_mks_positions):
     pose = np.eye(4,4)
-    shoulder_center = mocap_mks_positions['RShoulder'].reshape(3,1)
-    elbow_center = (mocap_mks_positions['r_melbow_study'] + mocap_mks_positions['r_lelbow_study']).reshape(3,1)/2.0
-    
-    Y = shoulder_center - elbow_center
-    Y = Y/np.linalg.norm(Y)
-    Z = (mocap_mks_positions['r_lelbow_study'] - mocap_mks_positions['r_melbow_study']).reshape(3,1)
-    Z = Z/np.linalg.norm(Z)
-    X = np.cross(Y, Z, axis=0)
-    Z = np.cross(X, Y, axis=0)
+    X, Y, Z, shoulder_center = [], [], [], []
+    if 'RShoulder' in mocap_mks_positions:
+        shoulder_center = mocap_mks_positions['RShoulder'].reshape(3,1)
+        elbow_center = (mocap_mks_positions['r_melbow_study'] + mocap_mks_positions['r_lelbow_study']).reshape(3,1)/2.0
+        
+        Y = shoulder_center - elbow_center
+        Y = Y/np.linalg.norm(Y)
+        Z = (mocap_mks_positions['r_lelbow_study'] - mocap_mks_positions['r_melbow_study']).reshape(3,1)
+        Z = Z/np.linalg.norm(Z)
+        X = np.cross(Y, Z, axis=0)
+        Z = np.cross(X, Y, axis=0)
+    else:
+        elbow_center = (mocap_mks_positions['RHLE'] + mocap_mks_positions['RHME']).reshape(3,1)/2.0
+        torso_pose = get_torso_pose(mocap_mks_positions)
+        bi_acromial_dist = np.linalg.norm(mocap_mks_positions['RSAT'] - mocap_mks_positions['LSAT'])
+        shoulder_center = mocap_mks_positions['RSAT'] + torso_pose[:3, :3] @ col_vector_3D(0., -0.17*bi_acromial_dist, 0)
+        Y = shoulder_center - elbow_center
+        Y = Y/np.linalg.norm(Y)
+        Z = (mocap_mks_positions['RHLE'] - mocap_mks_positions['RHME']).reshape(3,1)
+        Z = Z/np.linalg.norm(Z)
+        X = np.cross(Y, Z, axis=0)
+        Z = np.cross(X, Y, axis=0)
 
     pose[:3,0] = X.reshape(3,)
     pose[:3,1] = Y.reshape(3,)
@@ -66,15 +91,27 @@ def get_upperarm_pose(mocap_mks_positions):
 #construct lowerarm frame and get its pose
 def get_lowerarm_pose(mocap_mks_positions):
     pose = np.eye(4,4)
-    elbow_center = (mocap_mks_positions['r_melbow_study'] + mocap_mks_positions['r_lelbow_study']).reshape(3,1)/2.0
-    wrist_center = (mocap_mks_positions['r_mwrist_study'] + mocap_mks_positions['r_lwrist_study']).reshape(3,1)/2.0
-    
-    Y = elbow_center - wrist_center
-    Y = Y/np.linalg.norm(Y)
-    Z = (mocap_mks_positions['r_lwrist_study'] - mocap_mks_positions['r_mwrist_study']).reshape(3,1)
-    Z = Z/np.linalg.norm(Z)
-    X = np.cross(Y, Z, axis=0)
-    Z = np.cross(X, Y, axis=0)
+    X, Y, Z, elbow_center = [], [], [], []
+    if 'r_melbow_study' in mocap_mks_positions:
+        elbow_center = (mocap_mks_positions['r_melbow_study'] + mocap_mks_positions['r_lelbow_study']).reshape(3,1)/2.0
+        wrist_center = (mocap_mks_positions['r_mwrist_study'] + mocap_mks_positions['r_lwrist_study']).reshape(3,1)/2.0
+        
+        Y = elbow_center - wrist_center
+        Y = Y/np.linalg.norm(Y)
+        Z = (mocap_mks_positions['r_lwrist_study'] - mocap_mks_positions['r_mwrist_study']).reshape(3,1)
+        Z = Z/np.linalg.norm(Z)
+        X = np.cross(Y, Z, axis=0)
+        Z = np.cross(X, Y, axis=0)
+    else:
+        elbow_center = (mocap_mks_positions['RHLE'] + mocap_mks_positions['RHME']).reshape(3,1)/2.0
+        wrist_center = (mocap_mks_positions['RRSP'] + mocap_mks_positions['RUSP']).reshape(3,1)/2.0
+        
+        Y = elbow_center - wrist_center
+        Y = Y/np.linalg.norm(Y)
+        Z = (mocap_mks_positions['RRSP'] - mocap_mks_positions['RUSP']).reshape(3,1)
+        Z = Z/np.linalg.norm(Z)
+        X = np.cross(Y, Z, axis=0)
+        Z = np.cross(X, Y, axis=0)
 
     pose[:3,0] = X.reshape(3,)
     pose[:3,1] = Y.reshape(3,)
@@ -86,10 +123,20 @@ def get_lowerarm_pose(mocap_mks_positions):
 #construct pelvis frame and get its pose
 def get_pelvis_pose(mocap_mks_positions):
     pose = np.eye(4,4)
-    center_PSIS = (mocap_mks_positions['r.PSIS_study'] + mocap_mks_positions['L.PSIS_study']).reshape(3,1)/2.0
-    center_ASIS = (mocap_mks_positions['r.ASIS_study'] + mocap_mks_positions['L.ASIS_study']).reshape(3,1)/2.0
-    center_right_ASIS_PSIS = (mocap_mks_positions['r.PSIS_study'] + mocap_mks_positions['r.ASIS_study']).reshape(3,1)/2.0
-    center_left_ASIS_PSIS = (mocap_mks_positions['L.PSIS_study'] + mocap_mks_positions['L.ASIS_study']).reshape(3,1)/2.0
+    center_PSIS = []
+    center_ASIS = []
+    center_right_ASIS_PSIS = []
+    center_left_ASIS_PSIS = []
+    if "r.PSIS_study" in mocap_mks_positions:
+        center_PSIS = (mocap_mks_positions['r.PSIS_study'] + mocap_mks_positions['L.PSIS_study']).reshape(3,1)/2.0
+        center_ASIS = (mocap_mks_positions['r.ASIS_study'] + mocap_mks_positions['L.ASIS_study']).reshape(3,1)/2.0
+        center_right_ASIS_PSIS = (mocap_mks_positions['r.PSIS_study'] + mocap_mks_positions['r.ASIS_study']).reshape(3,1)/2.0
+        center_left_ASIS_PSIS = (mocap_mks_positions['L.PSIS_study'] + mocap_mks_positions['L.ASIS_study']).reshape(3,1)/2.0
+    else:
+        center_PSIS = (mocap_mks_positions['RIPS'] + mocap_mks_positions['LIPS']).reshape(3,1)/2.0
+        center_ASIS = (mocap_mks_positions['RIAS'] + mocap_mks_positions['LIAS']).reshape(3,1)/2.0
+        center_right_ASIS_PSIS = (mocap_mks_positions['RIPS'] + mocap_mks_positions['RIAS']).reshape(3,1)/2.0
+        center_left_ASIS_PSIS = (mocap_mks_positions['LIPS'] + mocap_mks_positions['LIAS']).reshape(3,1)/2.0
 
     X = center_ASIS - center_PSIS
     X = X/np.linalg.norm(X)
@@ -109,37 +156,61 @@ def get_pelvis_pose(mocap_mks_positions):
 #construct thigh frame and get its pose
 def get_thigh_pose(mocap_mks_positions):
     pose = np.eye(4,4)
-    hip_center = mocap_mks_positions['RHip'].reshape(3,1)
-    knee_center = (mocap_mks_positions['r_knee_study'] + mocap_mks_positions['r_mknee_study']).reshape(3,1)/2.0
-    
-    Y = hip_center - knee_center
-    Y = Y/np.linalg.norm(Y)
-    Z = (mocap_mks_positions['r_knee_study'] - mocap_mks_positions['r_mknee_study']).reshape(3,1)
-    Z = Z/np.linalg.norm(Z)
-    X = np.cross(Y, Z, axis=0)
-    Z = np.cross(X, Y, axis=0)
+    X, Y, Z = [], [], []
+    hip_center = np.zeros((3,1))
+    if "RHip" in mocap_mks_positions:
+        hip_center = mocap_mks_positions['RHip'].reshape(3,1)
+        knee_center = (mocap_mks_positions['r_knee_study'] + mocap_mks_positions['r_mknee_study']).reshape(3,1)/2.0
+        Y = hip_center - knee_center
+        Y = Y/np.linalg.norm(Y)
+        Z = (mocap_mks_positions['r_knee_study'] - mocap_mks_positions['r_mknee_study']).reshape(3,1)
+        Z = Z/np.linalg.norm(Z)
+        X = np.cross(Y, Z, axis=0)
+        Z = np.cross(X, Y, axis=0)
+    else:
+        dist_rPL_lPL = np.linalg.norm(mocap_mks_positions["RIAS"]-mocap_mks_positions["LIAS"])
+        pelvis_pose = get_pelvis_pose(mocap_mks_positions)
+        hip_center = pelvis_pose[:3, 3].reshape(3,1)
+        hip_center = hip_center + pelvis_pose[:3,:3].reshape(3,3) @ col_vector_3D(-0.14*dist_rPL_lPL, 0.0, 0.0)
+        hip_center = hip_center + pelvis_pose[:3,:3].reshape(3,3) @ col_vector_3D(0.0, -0.3*dist_rPL_lPL, 0.0)
+        hip_center = hip_center + pelvis_pose[:3,:3].reshape(3,3) @ col_vector_3D(0.0, 0.0, 0.22*dist_rPL_lPL)
+        knee_center = (mocap_mks_positions['RFLE'] + mocap_mks_positions['RFME']).reshape(3,1)/2.0
+        Y = hip_center - knee_center
+        Y = Y/np.linalg.norm(Y)
+        Z = (mocap_mks_positions['RFLE'] - mocap_mks_positions['RFME']).reshape(3,1)
+        Z = Z/np.linalg.norm(Z)
+        X = np.cross(Y, Z, axis=0)
+        Z = np.cross(X, Y, axis=0)
 
     pose[:3,0] = X.reshape(3,)
     pose[:3,1] = Y.reshape(3,)
     pose[:3,2] = Z.reshape(3,)
     pose[:3,3] = hip_center.reshape(3,)
     pose[:3,:3] = orthogonalize_matrix(pose[:3,:3])
-
     return pose
 
 #construct shank frame and get its pose
 def get_shank_pose(mocap_mks_positions):
     pose = np.eye(4,4)
-
-    knee_center = (mocap_mks_positions['r_knee_study'] + mocap_mks_positions['r_mknee_study']).reshape(3,1)/2.0
-    ankle_center = (mocap_mks_positions['r_mankle_study'] + mocap_mks_positions['r_ankle_study']).reshape(3,1)/2.0
-    
-    Y = knee_center - ankle_center
-    Y = Y/np.linalg.norm(Y)
-    Z = (mocap_mks_positions['r_knee_study'] - mocap_mks_positions['r_mknee_study']).reshape(3,1)
-    Z = Z/np.linalg.norm(Z)
-    X = np.cross(Y, Z, axis=0)
-    Z = np.cross(X, Y, axis=0)
+    X, Y, Z, knee_center, ankle_center = [], [], [], [], []
+    if "r_knee_study" in mocap_mks_positions:
+        knee_center = (mocap_mks_positions['r_knee_study'] + mocap_mks_positions['r_mknee_study']).reshape(3,1)/2.0
+        ankle_center = (mocap_mks_positions['r_mankle_study'] + mocap_mks_positions['r_ankle_study']).reshape(3,1)/2.0
+        Y = knee_center - ankle_center
+        Y = Y/np.linalg.norm(Y)
+        Z = (mocap_mks_positions['r_knee_study'] - mocap_mks_positions['r_mknee_study']).reshape(3,1)
+        Z = Z/np.linalg.norm(Z)
+        X = np.cross(Y, Z, axis=0)
+        Z = np.cross(X, Y, axis=0)
+    else:
+        knee_center = (mocap_mks_positions['RFLE'] + mocap_mks_positions['RFME']).reshape(3,1)/2.0
+        ankle_center = (mocap_mks_positions['RTAM'] + mocap_mks_positions['RFAL']).reshape(3,1)/2.0
+        Y = knee_center - ankle_center
+        Y = Y/np.linalg.norm(Y)
+        Z = (mocap_mks_positions['RFLE'] - mocap_mks_positions['RFME']).reshape(3,1)
+        Z = Z/np.linalg.norm(Z)
+        X = np.cross(Y, Z, axis=0)
+        Z = np.cross(X, Y, axis=0)
 
     pose[:3,0] = X.reshape(3,)
     pose[:3,1] = Y.reshape(3,)
@@ -151,15 +222,26 @@ def get_shank_pose(mocap_mks_positions):
 #construct foot frame and get its pose
 def get_foot_pose(mocap_mks_positions):
     pose = np.eye(4,4)
-
-    ankle_center = (mocap_mks_positions['r_mankle_study'] + mocap_mks_positions['r_ankle_study']).reshape(3,1)/2.0
-    
-    X = (mocap_mks_positions['r_toe_study'] - mocap_mks_positions['r_calc_study']).reshape(3,1)
-    X = X/np.linalg.norm(X)
-    Z = (mocap_mks_positions['r_ankle_study'] - mocap_mks_positions['r_mankle_study']).reshape(3,1)
-    Z = Z/np.linalg.norm(Z)
-    Y = np.cross(Z, X, axis=0)
-    Z = np.cross(X, Y, axis=0)
+    X, Y, Z, ankle_center = [], [], [], []
+    if "r_mankle_study" in mocap_mks_positions:
+        ankle_center = (mocap_mks_positions['r_mankle_study'] + mocap_mks_positions['r_ankle_study']).reshape(3,1)/2.0
+        X = (mocap_mks_positions['r_toe_study'] - mocap_mks_positions['r_calc_study']).reshape(3,1)
+        X = X/np.linalg.norm(X)
+        Z = (mocap_mks_positions['r_ankle_study'] - mocap_mks_positions['r_mankle_study']).reshape(3,1)
+        Z = Z/np.linalg.norm(Z)
+        Y = np.cross(Z, X, axis=0)
+        Z = np.cross(X, Y, axis=0)
+    else:
+        ankle_center = (mocap_mks_positions['RTAM'] + mocap_mks_positions['RFAL']).reshape(3,1)/2.0
+        toe_pos = (mocap_mks_positions['RFM5']+mocap_mks_positions['RFM1'])/2.0
+        print("toe pos:", toe_pos)
+        print("heel pos:", mocap_mks_positions['RFCC'])
+        X = (toe_pos- mocap_mks_positions['RFCC']).reshape(3,1)
+        X = X/np.linalg.norm(X)
+        Z = (mocap_mks_positions['RFAL'] - mocap_mks_positions['RTAM']).reshape(3,1)
+        Z = Z/np.linalg.norm(Z)
+        Y = np.cross(Z, X, axis=0)
+        Z = np.cross(X, Y, axis=0)
 
     pose[:3,0] = X.reshape(3,)
     pose[:3,1] = Y.reshape(3,)
@@ -167,7 +249,6 @@ def get_foot_pose(mocap_mks_positions):
     pose[:3,3] = ankle_center.reshape(3,)
     pose[:3,:3] = orthogonalize_matrix(pose[:3,:3])
     return pose
-
 
 
 #Construct challenge segments frames from mocap mks
@@ -195,6 +276,40 @@ def construct_segments_frames_challenge(mocap_mks_positions):
     # for name, pose in sgts_poses.items():
     #     print(name, " rot det : ", np.linalg.det(pose[:3,:3]))
     return sgts_poses
+
+def compare_offsets(mocap_mks_positions, lstm_mks_positions):
+    mocap_sgts_poses = construct_segments_frames_challenge(mocap_mks_positions)
+    lstm_sgts_poses = construct_segments_frames_challenge(lstm_mks_positions)
+    sgts_lenghts_lstm = {
+        "upperarm": np.linalg.norm(lstm_sgts_poses["upperarm"][:3,3]-lstm_sgts_poses["lowerarm"][:3,3]),
+        "lowerarm": np.linalg.norm(lstm_sgts_poses["lowerarm"][:3,3]-(lstm_mks_positions['r_lwrist_study'] + lstm_mks_positions['r_mwrist_study']).reshape(3,)/2.0),
+        "thigh": np.linalg.norm(lstm_sgts_poses["thigh"][:3,3]-lstm_sgts_poses["shank"][:3,3]),
+        "shank": np.linalg.norm(lstm_sgts_poses["shank"][:3,3]-lstm_sgts_poses["foot"][:3,3]),
+    }
+
+    sgts_lenghts_mocap = {
+        "upperarm": np.linalg.norm(mocap_sgts_poses["upperarm"][:3,3]-mocap_sgts_poses["lowerarm"][:3,3]),
+        "lowerarm": np.linalg.norm(mocap_sgts_poses["lowerarm"][:3,3]-(mocap_mks_positions['RRSP'] + mocap_mks_positions['RUSP']).reshape(3,)/2.0),
+        "thigh": np.linalg.norm(mocap_sgts_poses["thigh"][:3,3]-mocap_sgts_poses["shank"][:3,3]),
+        "shank": np.linalg.norm(mocap_sgts_poses["shank"][:3,3]-mocap_sgts_poses["foot"][:3,3]),
+    }
+    offset_rots = {}
+    for key, value in mocap_sgts_poses.items():
+        offset_rots[key] = mocap_sgts_poses[key][:3,:3].T @ lstm_sgts_poses[key][:3,:3]
+    
+    print("------ segments lengths -------")
+    for key, value in sgts_lenghts_lstm.items():
+        print(key, " lstm: ", sgts_lenghts_lstm[key], " m")
+        print(key, " mocap: ", sgts_lenghts_mocap[key], " m")
+    print("------ segments lengths error ------")
+    for key, value in sgts_lenghts_lstm.items():
+        print(key, sgts_lenghts_lstm[key] - sgts_lenghts_mocap[key], " m")
+
+    print("------ rotation offset ------")
+    for key, value in offset_rots.items():
+        print(key, R.from_matrix(value).as_euler('ZYX', degrees=True), " deg")
+
+
 
 def get_segments_lstm_mks_dict_challenge()->Dict:
     #This fuction returns a dictionnary containing the segments names, and the corresponding list of lstm
