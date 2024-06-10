@@ -9,15 +9,15 @@ from utils.read_write_utils import read_lstm_data, get_lstm_mks_names, read_moca
 from utils.model_utils import get_subset_challenge_mks_names, get_segments_lstm_mks_dict_challenge, build_model_challenge
 from utils.viz_utils import place, visualize_model_and_measurements
 
-fichier_csv_lstm_mks = "../data/jcp_coordinates_ncameras_augmented.csv"
-fichier_csv_mocap_mks = "../data/mks_coordinates_3D.trc"
-meshes_folder_path = "../meshes/" #Changes le par ton folder de meshes
+subject = 'sujet_1'
+task = 'Marche'
+fichier_csv_lstm_mks = "./data/"+subject+"/"+task+"/jcp_coordinates_ncameras_augmented.csv"
+meshes_folder_path = "./meshes/" #Changes le par ton folder de meshes
 
 #Read data
 lstm_mks_dict, mapping = read_lstm_data(fichier_csv_lstm_mks)
 lstm_mks_names = get_lstm_mks_names(fichier_csv_lstm_mks) #Liste des noms des mks du lstm (totalité des mks)
 subset_challenge_mks_names = get_subset_challenge_mks_names() #Cette fonction te retourne les noms des markers dont on a besoin pour le challenge
-mocap_mks_dict = read_mocap_data(fichier_csv_mocap_mks) #Markers mocap, pas utilisés ici car merdiques pour le moment
 lstm_mks_dict = convert_to_list_of_dicts(lstm_mks_dict) #Je convertis ton dictionnaire de trajectoires (arrays) en une "trajectoire de dictionnaires", c'est plus facile à manipuler pour la calib
 lstm_mks_positions_calib = lstm_mks_dict[0] #Je prends la première frame de la trajectoire pour construire le modèle
 seg_names_mks = get_segments_lstm_mks_dict_challenge() #Dictionnaire contenant les noms des segments + les mks correspondnat à chaque segment
@@ -44,17 +44,17 @@ except AttributeError as err:
     print(err)
     sys.exit(0)
 
-# for name, visual in visuals_dict.items():
-#     viz.viewer.gui.setColor(viz.getViewerNodeName(visual, pin.GeometryType.VISUAL), [0, 1, 1, 0.5])
+for name, visual in visuals_dict.items():
+    viz.viewer.gui.setColor(viz.getViewerNodeName(visual, pin.GeometryType.VISUAL), [0, 1, 1, 0.5])
 
 # Set color for other visual objects similarly
 data = model.createData()
 
 q0 = pin.neutral(model)
-q0 = np.array([ 1.67756366,  0.95857549, -0.3268217 , -0.0952691 ,  0.98975702,  0.02115747,
-  0.01148234, -0.00945201,  0.43447773, -0.21206613, -0.06484108,  0.72181881,
-  7.8476591,   0.32362688, -0.22469916, -0.3683439,  -0.05601409]
-)
+# q0 = np.array([ 1.67756366,  0.95857549, -0.3268217 , -0.0952691 ,  0.98975702,  0.02115747,
+#   0.01148234, -0.00945201,  0.43447773, -0.21206613, -0.06484108,  0.72181881,
+#   7.8476591,   0.32362688, -0.22469916, -0.3683439,  -0.05601409]
+# )
 
 viz.display(q0)
 
@@ -63,32 +63,29 @@ print(lstm_mks_dict[0])
 for i in range(len(lstm_mks_dict)):
     q.append(q0)
 
-sleep_time = 0.05
-visualize_model_and_measurements(model, q, lstm_mks_dict, seg_names_mks, sleep_time, viz)
+
+viz.viewer.gui.addXYZaxis('world/base_frame', [255, 0., 0, 1.], 0.02, 0.15)
+place(viz, 'world/base_frame', pin.SE3(np.eye(3), np.matrix([0, 0, 0]).T))
+
+for seg_name, mks in seg_names_mks.items():
+    viz.viewer.gui.addXYZaxis(f'world/{seg_name}', [255, 0., 0, 1.], 0.008, 0.08)
+    for mk_name in mks:
+        sphere_name = f'world/{mk_name}'
+        viz.viewer.gui.addSphere(sphere_name, 0.01, [0, 0., 255, 1.])
 
 
-# # viz.viewer.gui.addXYZaxis('world/base_frame', [255, 0., 0, 1.], 0.02, 0.15)
-# # place(viz, 'world/base_frame', pin.SE3(np.eye(3), np.matrix([0, 0, 0]).T))
+pin.forwardKinematics(model, data, q0)
+pin.updateFramePlacements(model, data)
 
-# for seg_name, mks in seg_names_mks.items():
-#     viz.viewer.gui.addXYZaxis(f'world/{seg_name}', [255, 0., 0, 1.], 0.008, 0.08)
-#     for mk_name in mks:
-#         sphere_name = f'world/{mk_name}'
-#         viz.viewer.gui.addSphere(sphere_name, 0.01, [0, 0., 255, 1.])
-
-
-# pin.forwardKinematics(model, data, q0)
-# pin.updateFramePlacements(model, data)
-
-# for seg_name, mks in seg_names_mks.items():
-#     #Display markers from model
-#     for mk_name in mks:
-#         sphere_name = f'world/{mk_name}'
-#         mk_position = data.oMf[model.getFrameId(mk_name)].translation
-#         place(viz, sphere_name, pin.SE3(np.eye(3), np.matrix(mk_position.reshape(3,)).T))
+for seg_name, mks in seg_names_mks.items():
+    #Display markers from model
+    for mk_name in mks:
+        sphere_name = f'world/{mk_name}'
+        mk_position = data.oMf[model.getFrameId(mk_name)].translation
+        place(viz, sphere_name, pin.SE3(np.eye(3), np.matrix(mk_position.reshape(3,)).T))
     
-#     #Display frames from model
-#     frame_name = f'world/{seg_name}'
-#     frame_se3= data.oMf[model.getFrameId(seg_name)]
-#     place(viz, frame_name, frame_se3)
+    #Display frames from model
+    frame_name = f'world/{seg_name}'
+    frame_se3= data.oMf[model.getFrameId(seg_name)]
+    place(viz, frame_name, frame_se3)
         

@@ -10,11 +10,16 @@ from utils.read_write_utils import read_lstm_data,get_lstm_mks_names,read_mocap_
 from utils.model_utils import get_torso_pose,get_thigh_pose,get_foot_pose,get_pelvis_pose,get_shank_pose,get_upperarm_pose,get_lowerarm_pose
 from utils.viz_utils import place
 
-fichier_csv_lstm_mks = "data/jcp_coordinates_ncameras_augmented.csv"
-fichier_csv_mocap_mks = "data/mks_coordinates_3D.trc"
+no_sujet="1"
+trial="exotique"
+trial_folder = "Exotique"
+
+fichier_csv_lstm_mks = f'./data/sujet_{no_sujet}/{trial_folder}/jcp_coordinates_ncameras_augmented.csv'
+
+# fichier_csv_mocap_mks = "data/mks_coordinates_3D.trc"
 lstm_mks_dict, mapping = read_lstm_data(fichier_csv_lstm_mks)
 lstm_mks_names = get_lstm_mks_names(fichier_csv_lstm_mks)
-mocap_mks_dict = read_mocap_data(fichier_csv_mocap_mks)
+# mocap_mks_dict = read_mocap_data(fichier_csv_mocap_mks)
 lstm_mks_dict = convert_to_list_of_dicts(lstm_mks_dict)
 
 viz = GepettoVisualizer()
@@ -49,8 +54,8 @@ for name in lstm_mks_names:
     viz.viewer.gui.addSphere(sphere_name, 0.015, [0, 0., 255, 1.])
 
 # Iterate over all points in first sample of lstm_mks_dict and add them to the viewer
-for i in range(1):
-# for i in range(25):
+# for i in range(1):
+for i in range(len(lstm_mks_dict)):
     torso_pose = get_torso_pose(lstm_mks_dict[i])
     upperarm_pose = get_upperarm_pose(lstm_mks_dict[i])
     lowerarm_pose = get_lowerarm_pose(lstm_mks_dict[i])
