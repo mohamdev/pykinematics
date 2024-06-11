@@ -22,6 +22,7 @@ class IK_Casadi:
         self._cmodel = cpin.Model(self._model)
         self._cdata = self._cmodel.createData()
 
+
         # Create a list of keys excluding the specified key
         self._keys_list = [key for key in self._dict_m[0].keys() if key !='Time']
 
@@ -47,7 +48,9 @@ class IK_Casadi:
                 cfunction_list.append(function_mk)
 
         self._cfunction_dict=dict(zip(self._new_key_list,cfunction_list))
-        
+
+        self._mapping_joint_angle = dict(zip(['FF_TX','FF_TY','FF_TZ','FF_Rquat0','FF_Rquat1','FF_Rquat2','FF_Rquat3','L5S1_FE','L5S1_RIE','RShoulder_FE','RShoulder_AA','RShoulder_RIE','RElbow_FE','RElbow_PS','RHip_FE','RHip_AA','RHip_RIE','RKnee_FE','RAnkle_FE'],np.arange(0,self._nq,1)))
+
     def create_meas_list(self)-> List[Dict]:
         """_Create a list with each element is a dictionnary of measurements referencing a given sample_
 
@@ -74,6 +77,9 @@ class IK_Casadi:
             np.ndarray: _q_i joint angle at the i-th sample_
         """
 
+        joint_to_regularize = ['RElbow_FE','RElbow_PS']
+        value_to_regul = 10
+
         # Casadi optimization class
         opti = casadi.Opti()
 
@@ -82,7 +88,12 @@ class IK_Casadi:
         Q = self._integrate(self._q0,DQ)
 
         omega = 0.001*np.ones(self._nv)
-        omega[15]=10 # Adapt the weight for given joints, for instance the hip Y
+
+        for name in joint_to_regularize :
+            if name in self._mapping_joint_angle:
+                omega[self._mapping_joint_angle[name]] = value_to_regul # Adapt the weight for given joints, for instance the hip Y
+            else :
+                raise ValueError("Joint to regulate not in the model")
 
         cost = 0
         for key in self._cfunction_dict.keys():
