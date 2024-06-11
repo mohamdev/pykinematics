@@ -78,7 +78,7 @@ class IK_Casadi:
         """
 
         joint_to_regularize = ['RElbow_FE','RElbow_PS','RHip_FE','RHip_AA','RHip_RIE']
-        value_to_regul = 10
+        value_to_regul = 1e-4
 
         # Casadi optimization class
         opti = casadi.Opti()
@@ -87,7 +87,7 @@ class IK_Casadi:
         DQ = opti.variable(self._nv)
         Q = self._integrate(self._q0,DQ)
 
-        omega = 0.001*np.ones(self._nv)
+        omega = 1e-6*np.ones(self._nq)
 
         for name in joint_to_regularize :
             if name in self._mapping_joint_angle:
@@ -97,7 +97,7 @@ class IK_Casadi:
 
         cost = 0
         for key in self._cfunction_dict.keys():
-            cost+=1000*casadi.sumsqr(meas[key]-self._cfunction_dict[key](Q)) + casadi.sum1(casadi.dot(omega,DQ)) #LASSO 
+            cost+=1*casadi.sumsqr(meas[key]-self._cfunction_dict[key](Q)) + 0.01*casadi.sum1(casadi.dot(omega,self._q0-Q)) #LASSO 
 
         # Set the constraint for the joint limits
         for i in range(7,self._nq):
@@ -107,7 +107,7 @@ class IK_Casadi:
 
         # Set Ipopt options to suppress output
         opts = {
-            "ipopt.print_level": 0,
+            "ipopt.print_level": 5,
             "ipopt.sb": "yes",
             "ipopt.max_iter": 100,
             "ipopt.linear_solver": "mumps"
