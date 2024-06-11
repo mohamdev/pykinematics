@@ -77,7 +77,7 @@ class IK_Casadi:
             np.ndarray: _q_i joint angle at the i-th sample_
         """
 
-        joint_to_regularize = ['RElbow_FE','RElbow_PS']
+        joint_to_regularize = ['RElbow_FE','RElbow_PS','RHip_FE','RHip_AA','RHip_RIE']
         value_to_regul = 10
 
         # Casadi optimization class

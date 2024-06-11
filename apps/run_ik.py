@@ -1,4 +1,4 @@
-from utils.read_write_utils import read_lstm_data, get_lstm_mks_names, read_mocap_data, convert_to_list_of_dicts
+from utils.read_write_utils import read_lstm_data, get_lstm_mks_names, read_mocap_data, convert_to_list_of_dicts, write_joint_angle_results
 from utils.ik_utils import IK_Casadi
 import pinocchio as pin 
 from utils.model_utils import get_subset_challenge_mks_names, get_segments_lstm_mks_dict_challenge, build_model_challenge
@@ -9,7 +9,7 @@ import numpy as np
 import time 
 
 subject = 'sujet_2'
-task = 'Exotique'
+task = 'Assis-debout'
 
 fichier_csv_lstm_mks = "data/"+subject+"/"+task+"/jcp_coordinates_ncameras_augmented.csv"
 fichier_csv_mocap_mks = "data/mks_coordinates_3D_"+subject+".trc"
@@ -38,6 +38,10 @@ q0[17]=-np.pi/2
 ik_problem = IK_Casadi(model, lstm_mks_dict, q0)
 
 q = ik_problem.solve_ik()
+
+q=np.array(q)
+directory_name = "results/test/"
+write_joint_angle_results(directory_name,q)
 
 ### Visualisation of the obtained trajectory 
 

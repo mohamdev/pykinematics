@@ -117,7 +117,7 @@ def write_joint_angle_results(directory_name: str, q:np.ndarray):
         directory_name (str): _Name of the directory to store the results_
         q (np.ndarray): _Joint angle results_
     """
-    dofs_names = ['FF_TX','FF_TY','FF_TZ','FF_Rquat0','FF_Rquat1','FF_Rquat2','FF_Rquat3','L5S1_FE','RShoulder_FE','RShoulder_AA','RShoulder_RIE','RElbow_FE','RElbow_PS','RHip_FE','RHip_AA','RKnee_FE','RAnkle_FE']
+    dofs_names = ['FF_TX','FF_TY','FF_TZ','FF_Rquat0','FF_Rquat1','FF_Rquat2','FF_Rquat3','L5S1_FE','L5S1_RIE','RShoulder_FE','RShoulder_AA','RShoulder_RIE','RElbow_FE','RElbow_PS','RHip_FE','RHip_AA','RHip_RIE','RKnee_FE','RAnkle_FE']
     for ii in range(q.shape[1]):
         open(directory_name+'/'+dofs_names[ii]+'.csv', 'w').close() # clear the file 
         np.savetxt(directory_name+'/'+dofs_names[ii]+'.csv', q[:,ii])
@@ -128,7 +128,7 @@ def plot_joint_angle_results(directory_name:str):
     Args:
         directory_name (str): _Directory name where the data to plot are stored_
     """
-    dofs_names = ['FF_TX','FF_TY','FF_TZ','FF_Rquat0','FF_Rquat1','FF_Rquat2','FF_Rquat3','L5S1_FE','RShoulder_FE','RShoulder_AA','RShoulder_RIE','RElbow_FE','RElbow_PS','RHip_FE','RHip_AA','RKnee_FE','RAnkle_FE']
+    dofs_names = ['FF_TX','FF_TY','FF_TZ','FF_Rquat0','FF_Rquat1','FF_Rquat2','FF_Rquat3','L5S1_FE','L5S1_RIE','RShoulder_FE','RShoulder_AA','RShoulder_RIE','RElbow_FE','RElbow_PS','RHip_FE','RHip_AA','RHip_RIE','RKnee_FE','RAnkle_FE']
     for name in dofs_names: 
         q_i = np.loadtxt(directory_name+'/'+name+'.csv')
         plt.plot(q_i)
@@ -136,7 +136,7 @@ def plot_joint_angle_results(directory_name:str):
         plt.show()
 
 def read_joint_angles(directory_name:str)->np.ndarray:
-    dofs_names = ['FF_TX','FF_TY','FF_TZ','FF_Rquat0','FF_Rquat1','FF_Rquat2','FF_Rquat3','L5S1_FE','RShoulder_FE','RShoulder_AA','RShoulder_RIE','RElbow_FE','RElbow_PS','RHip_FE','RHip_AA','RKnee_FE','RAnkle_FE']
+    dofs_names = ['FF_TX','FF_TY','FF_TZ','FF_Rquat0','FF_Rquat1','FF_Rquat2','FF_Rquat3','L5S1_FE','L5S1_RIE','RShoulder_FE','RShoulder_AA','RShoulder_RIE','RElbow_FE','RElbow_PS','RHip_FE','RHip_AA','RHip_RIE','RKnee_FE','RAnkle_FE']
     q=[]
     for name in dofs_names: 
         q_i = np.loadtxt(directory_name+'/'+name+'.csv')
