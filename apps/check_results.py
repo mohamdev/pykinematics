@@ -9,11 +9,12 @@ from utils.read_write_utils import read_lstm_data, get_lstm_mks_names, read_moca
 from utils.model_utils import get_subset_challenge_mks_names, get_segments_lstm_mks_dict_challenge, build_model_challenge
 from utils.viz_utils import place, visualize_joint_angle_results, visualize_model_and_measurements
 
-subject = 'sujet_1'
-task = 'Exotique'
+subject = 'sujet_2'
+task = 'Assis-debout'
 
 fichier_csv_lstm_mks = "data/"+subject+"/"+task+"/jcp_coordinates_ncameras_augmented.csv"
-results_directory = "results/calib_lstm/"+subject+"/"+task
+# results_directory = "results/calib_lstm/"+subject+"/"+task
+results_directory = "results/test/"
 
 fichier_csv_mocap_mks = "data/mks_coordinates_3D.trc"
 meshes_folder_path = "meshes/" #Changes le par ton folder de meshes
