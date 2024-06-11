@@ -29,6 +29,9 @@ seg_names_mks = get_segments_lstm_mks_dict_challenge() #Dictionnaire contenant l
 model, geom_model, visuals_dict = build_model_challenge(lstm_mks_positions_calib, lstm_mks_positions_calib, meshes_folder_path)
 
 q0 = pin.neutral(model)
+q0[7:]=0.0001*np.ones(model.nq-7)
+q0[14]=-np.pi/2
+q0[17]=-np.pi/2
 
 ### IK 
 
@@ -58,6 +61,14 @@ except AttributeError as err:
 for name, visual in visuals_dict.items():
     viz.viewer.gui.setColor(viz.getViewerNodeName(visual, pin.GeometryType.VISUAL), [0, 1, 1, 0.5])
 
+for seg_name, mks in seg_names_mks.items():
+    viz.viewer.gui.addXYZaxis(f'world/{seg_name}', [0, 255., 0, 1.], 0.008, 0.08)
+    for mk_name in mks:
+        sphere_name_model = f'world/{mk_name}_model'
+        sphere_name_raw = f'world/{mk_name}_raw'
+        viz.viewer.gui.addSphere(sphere_name_model, 0.01, [0, 0., 255, 1.])
+        viz.viewer.gui.addSphere(sphere_name_raw, 0.01, [255, 0., 0, 1.])
+
 # Set color for other visual objects similarly
 data = model.createData()
 
@@ -66,25 +77,21 @@ for i in range(len(q)):
     q_i = q[i]
     viz.display(q_i)
 
-    for seg_name, mks in seg_names_mks.items():
-        viz.viewer.gui.addXYZaxis(f'world/{seg_name}', [255, 0., 0, 1.], 0.008, 0.08)
-        for mk_name in mks:
-            sphere_name = f'world/{mk_name}'
-            viz.viewer.gui.addSphere(sphere_name, 0.01, [0, 0., 255, 1.])
-
-
     pin.forwardKinematics(model, data, q_i)
     pin.updateFramePlacements(model, data)
 
     for seg_name, mks in seg_names_mks.items():
         #Display markers from model
         for mk_name in mks:
-            sphere_name = f'world/{mk_name}'
+            sphere_name_model = f'world/{mk_name}_model'
+            sphere_name_raw = f'world/{mk_name}_raw'
             mk_position = data.oMf[model.getFrameId(mk_name)].translation
-            place(viz, sphere_name, pin.SE3(np.eye(3), np.matrix(mk_position.reshape(3,)).T))
+            place(viz, sphere_name_model, pin.SE3(np.eye(3), np.matrix(mk_position.reshape(3,)).T))
+            place(viz, sphere_name_raw, pin.SE3(np.eye(3), np.matrix(lstm_mks_dict[i][mk_name].reshape(3,)).T))
         
         #Display frames from model
         frame_name = f'world/{seg_name}'
         frame_se3= data.oMf[model.getFrameId(seg_name)]
         place(viz, frame_name, frame_se3)
+
     time.sleep(0.016)

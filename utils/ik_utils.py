@@ -81,9 +81,12 @@ class IK_Casadi:
         DQ = opti.variable(self._nv)
         Q = self._integrate(self._q0,DQ)
 
+        omega = 0.001*np.ones(self._nv)
+        omega[15]=10 # Adapt the weight for given joints, for instance the hip Y
+
         cost = 0
         for key in self._cfunction_dict.keys():
-            cost+=100*casadi.sumsqr(meas[key]-self._cfunction_dict[key](Q)) + 0.01*casadi.sum1(self._q0-Q) #LASSO 
+            cost+=1000*casadi.sumsqr(meas[key]-self._cfunction_dict[key](Q)) + casadi.sum1(casadi.dot(omega,DQ)) #LASSO 
 
         # Set the constraint for the joint limits
         for i in range(7,self._nq):
