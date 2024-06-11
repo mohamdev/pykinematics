@@ -498,7 +498,7 @@ def build_model_challenge(mocap_mks_positions: Dict, lstm_mks_positions: Dict, m
     visuals_dict["abdomen"] = abdomen_visual
 
     # Shoulder ZXY
-    IDX_SH_Z_JF = model.addJoint(IDX_L5S1_JF,pin.JointModelRY(),pin.SE3(np.eye(3), np.matrix(local_segments_positions['upperarm'] + local_segments_positions['torso']).T),'Shoulder_Z') 
+    IDX_SH_Z_JF = model.addJoint(IDX_L5S1_JF,pin.JointModelRZ(),pin.SE3(np.eye(3), np.matrix(local_segments_positions['upperarm'] + local_segments_positions['torso']).T),'Shoulder_Z') 
     upperarm = pin.Frame('upperarm_z',IDX_SH_Z_JF,idx_frame,pin.SE3(np.eye(3), np.matrix([0,0,0]).T),pin.FrameType.OP_FRAME, inertia)
     IDX_UPA_SF = model.addFrame(upperarm,False)
     idx_frame = IDX_UPA_SF
