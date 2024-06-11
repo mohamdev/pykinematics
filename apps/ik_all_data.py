@@ -11,13 +11,13 @@ meshes_folder_path = "meshes/" #Changes le par ton folder de meshes
 for subject in subjects :
     for task in tasks: 
         fichier_csv_lstm_mks = "data/"+subject+"/"+task+"/jcp_coordinates_ncameras_augmented.csv"
-        # fichier_csv_mocap_mks = "data/"+subject+"/"+task+"/mks_coordinates_3D.trc"
+        fichier_csv_mocap_mks = "data/mks_coordinates_3D_"+subject+".trc"
 
         #Read data
         lstm_mks_dict, mapping = read_lstm_data(fichier_csv_lstm_mks)
         lstm_mks_names = get_lstm_mks_names(fichier_csv_lstm_mks) #Liste des noms des mks du lstm (totalité des mks)
         subset_challenge_mks_names = get_subset_challenge_mks_names() #Cette fonction te retourne les noms des markers dont on a besoin pour le challenge
-        # mocap_mks_dict = read_mocap_data(fichier_csv_mocap_mks) #Markers mocap, pas utilisés ici car merdiques pour le moment
+        mocap_mks_dict = read_mocap_data(fichier_csv_mocap_mks) #Markers mocap, pas utilisés ici car merdiques pour le moment
         lstm_mks_dict = convert_to_list_of_dicts(lstm_mks_dict) #Je convertis ton dictionnaire de trajectoires (arrays) en une "trajectoire de dictionnaires", c'est plus facile à manipuler pour la calib
         lstm_mks_positions_calib = lstm_mks_dict[0] #Je prends la première frame de la trajectoire pour construire le modèle
         seg_names_mks = get_segments_lstm_mks_dict_challenge() #Dictionnaire contenant les noms des segments + les mks correspondnat à chaque segment

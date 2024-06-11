@@ -6,12 +6,13 @@ import sys
 from pinocchio.visualize import GepettoVisualizer
 from utils.viz_utils import place
 import numpy as np 
+import time 
 
-subject = 'sujet_1'
+subject = 'sujet_2'
 task = 'Exotique'
 
 fichier_csv_lstm_mks = "data/"+subject+"/"+task+"/jcp_coordinates_ncameras_augmented.csv"
-fichier_csv_mocap_mks = "data/mks_coordinates_3D.trc"
+fichier_csv_mocap_mks = "data/mks_coordinates_3D_"+subject+".trc"
 meshes_folder_path = "meshes/" #Changes le par ton folder de meshes
 
 #Read data
@@ -60,6 +61,7 @@ for name, visual in visuals_dict.items():
 # Set color for other visual objects similarly
 data = model.createData()
 
+input("Ready?")
 for i in range(len(q)):
     q_i = q[i]
     viz.display(q_i)
@@ -85,4 +87,4 @@ for i in range(len(q)):
         frame_name = f'world/{seg_name}'
         frame_se3= data.oMf[model.getFrameId(seg_name)]
         place(viz, frame_name, frame_se3)
-    input()
+    time.sleep(0.016)
