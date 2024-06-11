@@ -480,7 +480,7 @@ def build_model_challenge(mocap_mks_positions: Dict, lstm_mks_positions: Dict, m
     IDX_TORSO_SF = model.addFrame(torso,False)
     idx_frame = IDX_TORSO_SF
 
-    IDX_L5S1_R_EXT_INT_JF = model.addJoint(IDX_L5S1_JF,pin.JointModelRZ(),pin.SE3(np.eye(3), np.matrix([0, 0, 0]).T),'L5S1_R_EXT_INT') 
+    IDX_L5S1_R_EXT_INT_JF = model.addJoint(IDX_L5S1_JF,pin.JointModelRY(),pin.SE3(np.eye(3), np.matrix([0, 0, 0]).T),'L5S1_R_EXT_INT') 
     torso = pin.Frame('torso',IDX_L5S1_R_EXT_INT_JF,idx_frame,pin.SE3(np.eye(3), np.matrix(local_segments_positions['torso']).T),pin.FrameType.OP_FRAME, inertia)
     IDX_TORSO_SF = model.addFrame(torso,False)
     idx_frame = IDX_TORSO_SF
@@ -498,7 +498,7 @@ def build_model_challenge(mocap_mks_positions: Dict, lstm_mks_positions: Dict, m
     visuals_dict["abdomen"] = abdomen_visual
 
     # Shoulder ZXY
-    IDX_SH_Z_JF = model.addJoint(IDX_L5S1_JF,pin.JointModelRY(),pin.SE3(np.eye(3), np.matrix(local_segments_positions['upperarm'] + local_segments_positions['torso']).T),'Shoulder_Z') 
+    IDX_SH_Z_JF = model.addJoint(IDX_L5S1_JF,pin.JointModelRZ(),pin.SE3(np.eye(3), np.matrix(local_segments_positions['upperarm'] + local_segments_positions['torso']).T),'Shoulder_Z') 
     upperarm = pin.Frame('upperarm_z',IDX_SH_Z_JF,idx_frame,pin.SE3(np.eye(3), np.matrix([0,0,0]).T),pin.FrameType.OP_FRAME, inertia)
     IDX_UPA_SF = model.addFrame(upperarm,False)
     idx_frame = IDX_UPA_SF
@@ -558,7 +558,7 @@ def build_model_challenge(mocap_mks_positions: Dict, lstm_mks_positions: Dict, m
     IDX_THIGH_SF = model.addFrame(thigh,False)
     idx_frame = IDX_THIGH_SF
 
-    IDX_HIP_Y_JF = model.addJoint(IDX_HIP_X_JF,pin.JointModelRX(),pin.SE3(np.eye(3), np.matrix([0,0,0]).T),'Hip_Y') 
+    IDX_HIP_Y_JF = model.addJoint(IDX_HIP_X_JF,pin.JointModelRY(),pin.SE3(np.eye(3), np.matrix([0,0,0]).T),'Hip_Y') 
     thigh = pin.Frame('thigh',IDX_HIP_Y_JF,idx_frame,pin.SE3(np.eye(3), np.matrix([0,0,0]).T),pin.FrameType.OP_FRAME, inertia)
     IDX_THIGH_SF = model.addFrame(thigh,False)
     idx_frame = IDX_THIGH_SF
@@ -614,8 +614,8 @@ def build_model_challenge(mocap_mks_positions: Dict, lstm_mks_positions: Dict, m
         print(("{:<24} : {: .2f} {: .2f} {: .2f}"
             .format( name, *oMi.translation.T.flat )))
 
-    # model.upperPositionLimit[7:] = np.array([0.305,3.142,3.142,1.22,2.53, 1.57, 0.52,0.52,0,0.35])
-    # model.lowerPositionLimit[7:] = np.array([-0.393,-1.047,-0.698,-1.57,0, -1.57, -2.27,-0.52,-2.36,-0.87])
+    model.upperPositionLimit[7:] = np.array([0.305,0.524,3.142,3.142,1.22,2.53, 1.57, 0.52,0.52,0.785,0,0.35])
+    model.lowerPositionLimit[7:] = np.array([-0.393,-0.524,-1.047,-0.698,-1.57,0, -1.57, -2.27,-0.52,-0.785,-2.36,-0.87])
 
     return model, geom_model, visuals_dict
 
