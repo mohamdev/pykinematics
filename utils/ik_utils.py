@@ -39,7 +39,9 @@ class IK_Casadi:
         cfunction_list = []
         self._new_key_list = [] # Only take the frames that are in the model 
 
-        for key in self._keys_list:
+        self._keys_to_track_list = ['C7_study','r_shoulder_study', 'L_shoulder_study','r.ASIS_study', 'L.ASIS_study', 'r.PSIS_study', 'L.PSIS_study','r_lelbow_study', 'r_melbow_study','r_lwrist_study', 'r_mwrist_study','r_ankle_study', 'r_mankle_study','r_toe_study', 'r_5meta_study', 'r_calc_study','r_knee_study', 'r_mknee_study','r_thigh1_study', 'r_thigh2_study', 'r_thigh3_study','r_sh1_study', 'r_sh2_study', 'r_sh3_study']
+
+        for key in self._keys_to_track_list:
             index_mk = self._cmodel.getFrameId(key)
             if index_mk < len(self._model.frames.tolist()): # Check that the frame is in the model
                 new_key = key.replace('.','')
@@ -77,8 +79,8 @@ class IK_Casadi:
             np.ndarray: _q_i joint angle at the i-th sample_
         """
 
-        joint_to_regularize = ['RHip_FE','RHip_AA','RHip_RIE']
-        value_to_regul = 1
+        joint_to_regularize = [] #['RElbow_FE','RElbow_PS','RHip_RIE']
+        value_to_regul = 0.001
 
         # Casadi optimization class
         opti = casadi.Opti()
@@ -96,8 +98,13 @@ class IK_Casadi:
                 raise ValueError("Joint to regulate not in the model")
 
         cost = 0
-        for key in self._cfunction_dict.keys():
-            cost+=1*casadi.sumsqr(meas[key]-self._cfunction_dict[key](Q)) + 0.01*casadi.sum1(casadi.dot(omega,self._q0-Q)) #LASSO 
+
+        if ii == 0:
+            for key in self._cfunction_dict.keys():
+                cost+=1*casadi.sumsqr(meas[key]-self._cfunction_dict[key](Q))
+        else : 
+            for key in self._cfunction_dict.keys():
+                cost+=1*casadi.sumsqr(meas[key]-self._cfunction_dict[key](Q))  + 0.001*casadi.sumsqr(casadi.dot(omega,self._q0-Q))
 
         # Set the constraint for the joint limits
         for i in range(7,self._nq):
@@ -107,16 +114,16 @@ class IK_Casadi:
 
         # Set Ipopt options to suppress output
         opts = {
-            "ipopt.print_level": 5,
+            "ipopt.print_level": 0,
             "ipopt.sb": "yes",
-            "ipopt.max_iter": 100,
+            "ipopt.max_iter": 1000,
             "ipopt.linear_solver": "mumps"
         }
 
         opti.solver("ipopt", opts)
 
         print('Solving for ' + str(ii) +'...')
-        sol = opti.solve_limited()
+        sol = opti.solve()
         
         q_i = sol.value(Q)
         return q_i 
