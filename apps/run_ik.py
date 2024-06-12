@@ -10,7 +10,7 @@ import numpy as np
 import time 
 
 subject = 'sujet_1'
-task = 'Manutention'
+task = 'Exotique'
 
 fichier_csv_lstm_mks_calib = "data/"+subject+"/Marche/jcp_coordinates_ncameras_augmented.csv"
 fichier_csv_lstm_mks = "data/"+subject+"/"+task+"/jcp_coordinates_ncameras_augmented.csv"
@@ -39,12 +39,12 @@ q0[7:]=0.0001*np.ones(model.nq-7)
 
 ###### FOR MANUTENTION ONLY TRY TO MITIGATE MOONWALK ######
 
-for jj in range(1,len(lstm_mks_dict)):
-    lstm_mks_dict[jj]["r_toe_study"]=lstm_mks_dict[0]["r_toe_study"]
-    lstm_mks_dict[jj]["r_ankle_study"]=lstm_mks_dict[0]["r_ankle_study"]
-    lstm_mks_dict[jj]["r_mankle_study"]=lstm_mks_dict[0]["r_mankle_study"]
-    lstm_mks_dict[jj]["r_5meta_study"]=lstm_mks_dict[0]["r_5meta_study"]
-    lstm_mks_dict[jj]["r_calc_study"]=lstm_mks_dict[0]["r_calc_study"]
+# for jj in range(1,len(lstm_mks_dict)):
+#     lstm_mks_dict[jj]["r_toe_study"]=lstm_mks_dict[0]["r_toe_study"]
+#     lstm_mks_dict[jj]["r_ankle_study"]=lstm_mks_dict[0]["r_ankle_study"]
+#     lstm_mks_dict[jj]["r_mankle_study"]=lstm_mks_dict[0]["r_mankle_study"]
+#     lstm_mks_dict[jj]["r_5meta_study"]=lstm_mks_dict[0]["r_5meta_study"]
+#     lstm_mks_dict[jj]["r_calc_study"]=lstm_mks_dict[0]["r_calc_study"]
 
 
 ik_problem = IK_Casadi(model, lstm_mks_dict, q0)
