@@ -9,8 +9,8 @@ from utils.viz_utils import place
 import numpy as np 
 import time 
 
-subject = 'sujet_2'
-task = 'Assis-debout'
+subject = 'sujet_1'
+task = 'Manutention'
 
 fichier_csv_lstm_mks_calib = "data/"+subject+"/Marche/jcp_coordinates_ncameras_augmented.csv"
 fichier_csv_lstm_mks = "data/"+subject+"/"+task+"/jcp_coordinates_ncameras_augmented.csv"
@@ -34,17 +34,25 @@ model, geom_model, visuals_dict = build_model_challenge(lstm_mks_positions_calib
 
 q0 = pin.neutral(model)
 q0[7:]=0.0001*np.ones(model.nq-7)
-q0[14]=-np.pi/2
-q0[17]=-np.pi/2
 
 ### IK 
+
+###### FOR MANUTENTION ONLY TRY TO MITIGATE MOONWALK ######
+
+for jj in range(1,len(lstm_mks_dict)):
+    lstm_mks_dict[jj]["r_toe_study"]=lstm_mks_dict[0]["r_toe_study"]
+    lstm_mks_dict[jj]["r_ankle_study"]=lstm_mks_dict[0]["r_ankle_study"]
+    lstm_mks_dict[jj]["r_mankle_study"]=lstm_mks_dict[0]["r_mankle_study"]
+    lstm_mks_dict[jj]["r_5meta_study"]=lstm_mks_dict[0]["r_5meta_study"]
+    lstm_mks_dict[jj]["r_calc_study"]=lstm_mks_dict[0]["r_calc_study"]
+
 
 ik_problem = IK_Casadi(model, lstm_mks_dict, q0)
 
 q = ik_problem.solve_ik()
 
 q=np.array(q)
-directory_name = "results/test/"
+directory_name = "results/challenge/"+subject+"/"+task
 write_joint_angle_results(directory_name,q)
 
 ### Visualisation of the obtained trajectory 
@@ -80,7 +88,6 @@ for seg_name, mks in seg_names_mks.items():
 # Set color for other visual objects similarly
 data = model.createData()
 
-input("Ready?")
 for i in range(len(q)):
     q_i = q[i]
     viz.display(q_i)
@@ -101,5 +108,8 @@ for i in range(len(q)):
         frame_name = f'world/{seg_name}'
         frame_se3= data.oMf[model.getFrameId(seg_name)]
         place(viz, frame_name, frame_se3)
-
-    time.sleep(0.016)
+    
+    if i == 0:
+        input("Ready?")
+    else:
+        time.sleep(0.016)
