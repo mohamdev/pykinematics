@@ -20,7 +20,7 @@ fichier_csv_mocap_mks = "data/mks_coordinates_3D.trc"
 meshes_folder_path = "meshes/" #Changes le par ton folder de meshes
 
 # # Plots 
-# plot_joint_angle_results(results_directory)
+plot_joint_angle_results(results_directory)
 
 #Read data
 lstm_mks_dict, mapping = read_lstm_data(fichier_csv_lstm_mks)
