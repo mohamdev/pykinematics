@@ -1,3 +1,4 @@
+# import eigenpy
 from utils.read_write_utils import read_lstm_data, get_lstm_mks_names, read_mocap_data, convert_to_list_of_dicts, write_joint_angle_results
 from utils.ik_utils import IK_Casadi
 import pinocchio as pin 

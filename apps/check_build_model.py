@@ -62,10 +62,11 @@ q = []
 print(lstm_mks_dict[0])
 for i in range(len(lstm_mks_dict)):
     q.append(q0)
+    q0[7] = -0.39
 
 
-viz.viewer.gui.addXYZaxis('world/base_frame', [255, 0., 0, 1.], 0.02, 0.15)
-place(viz, 'world/base_frame', pin.SE3(np.eye(3), np.matrix([0, 0, 0]).T))
+# viz.viewer.gui.addXYZaxis('world/base_frame', [255, 0., 0, 1.], 0.02, 0.15)
+# place(viz, 'world/base_frame', pin.SE3(np.eye(3), np.matrix([0, 0, 0]).T))
 
 for seg_name, mks in seg_names_mks.items():
     viz.viewer.gui.addXYZaxis(f'world/{seg_name}', [255, 0., 0, 1.], 0.008, 0.08)
