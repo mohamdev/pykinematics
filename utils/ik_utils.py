@@ -39,7 +39,8 @@ class IK_Casadi:
         cfunction_list = []
         self._new_key_list = [] # Only take the frames that are in the model 
 
-        self._keys_to_track_list = ['C7_study','r_shoulder_study', 'L_shoulder_study','r.ASIS_study', 'L.ASIS_study', 'r.PSIS_study', 'L.PSIS_study','r_lelbow_study', 'r_melbow_study','r_lwrist_study', 'r_mwrist_study','r_ankle_study', 'r_mankle_study','r_toe_study', 'r_5meta_study', 'r_calc_study','r_knee_study', 'r_mknee_study','r_thigh1_study', 'r_thigh2_study', 'r_thigh3_study','r_sh1_study', 'r_sh2_study', 'r_sh3_study']
+
+        self._keys_to_track_list = ['LIAS', 'RIAS', 'LIPS', 'RIPS', 'LFLE', 'LFAL', 'LFCC', 'RFLE', 'RFAL', 'RFCC', 'LFME', 'LTAM', 'LFM5', 'LFM1', 'RFM5', 'RFM1', 'RTAM', 'RFME']
 
         for key in self._keys_to_track_list:
             index_mk = self._cmodel.getFrameId(key)
@@ -51,7 +52,7 @@ class IK_Casadi:
 
         self._cfunction_dict=dict(zip(self._new_key_list,cfunction_list))
 
-        self._mapping_joint_angle = dict(zip(['FF_TX','FF_TY','FF_TZ','FF_Rquat0','FF_Rquat1','FF_Rquat2','FF_Rquat3','L5S1_FE','L5S1_RIE','RShoulder_FE','RShoulder_AA','RShoulder_RIE','RElbow_FE','RElbow_PS','RHip_FE','RHip_AA','RHip_RIE','RKnee_FE','RAnkle_FE'],np.arange(0,self._nq,1)))
+        self._mapping_joint_angle = dict(zip(['Hip_Z_R', 'Hip_X_R', 'Hip_Y_R', 'Knee_Z_R', 'Ankle_Z_R', 'Ankle_X_R','Hip_X_L', 'Hip_Y_L', 'Knee_Z_L', 'Ankle_Z_L', 'Ankle_X_L'],np.arange(0,self._nq,1)))
 
     def create_meas_list(self)-> List[Dict]:
         """_Create a list with each element is a dictionnary of measurements referencing a given sample_

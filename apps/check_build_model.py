@@ -9,7 +9,11 @@ from utils.read_write_utils import read_lstm_data, get_lstm_mks_names, read_moca
 from utils.model_utils import get_subset_challenge_mks_names, get_segments_lstm_mks_dict_challenge, build_model_challenge, get_segments_mocap_mks
 from utils.viz_utils import place, visualize_model_and_measurements
 
-fichier_csv_mocap_mks = "./data/mks_data_valid_hulahoop.csv" 
+subject = 'subject1'
+type = 'train'
+task= 'balancing'
+#fichier_csv_mocap_mks = "./data/mocap_data/Lowerbody_Cal_.csv"  #just to check the markers
+fichier_csv_mocap_mks = "./data/mocap_data/"+ subject +"/mks_data_"+ type +"_"+task +".csv"
 meshes_folder_path = "./meshes" #Changes le par ton folder de meshes
 
 #Read data
@@ -53,11 +57,11 @@ q0 = pin.neutral(model)
 
 viz.display(q0)
 
-# q = []
-# print(lstm_mks_dict[0])
-# for i in range(len(lstm_mks_dict)):
-#     q.append(q0)
-#     q0[7] = -0.39
+q = []
+print(mocap_mks_list[0])
+for i in range(len(mocap_mks_list)):
+    q.append(q0)
+    q0[11] = 1.22
 
 
 # viz.viewer.gui.addXYZaxis('world/base_frame', [255, 0., 0, 1.], 0.02, 0.15)

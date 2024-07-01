@@ -85,6 +85,7 @@ def get_lstm_mks_names(file_name: str):
     mk_names = [mot for mot in mk_names if pd.notna(mot)] #On enlève les nan correspondant aux cases vides du fichier csv
     return mk_names
 
+#read the first and second line of mocap data, from a trc file
 # def read_mocap_data(file_path: str)->Dict:
 #     """_Gets the lstm mks names_
 #     Args:
@@ -112,7 +113,7 @@ def get_lstm_mks_names(file_name: str):
     
 #     return mocap_mks_positions
 
-
+#read all mocap data from a csv file 
 def read_mocap_data(file_path: str) -> list:
     """Gets the mocap markers names and positions from a file.
     
@@ -127,10 +128,7 @@ def read_mocap_data(file_path: str) -> list:
     df = pd.read_csv(file_path)
     # print(df.values[:,2:])
     positions = df.values[:,2:]
-    # print(positions[0][3*0:3*0+3])
 
-    
-    
     # Extract landmarks names from the columns and remove 'Lowerbody:' prefix
     landmarks = [col.replace('Lowerbody:', '').strip() for col in df.columns[2::3]]
     
@@ -150,7 +148,7 @@ def write_joint_angle_results(directory_name: str, q:np.ndarray):
         directory_name (str): _Name of the directory to store the results_
         q (np.ndarray): _Joint angle results_
     """
-    dofs_names = ['FF_TX','FF_TY','FF_TZ','FF_Rquat0','FF_Rquat1','FF_Rquat2','FF_Rquat3','L5S1_FE','L5S1_RIE','RShoulder_FE','RShoulder_AA','RShoulder_RIE','RElbow_FE','RElbow_PS','RHip_FE','RHip_AA','RHip_RIE','RKnee_FE','RAnkle_FE']
+    dofs_names = ['Hip_Z_R', 'Hip_X_R', 'Hip_Y_R', 'Knee_Z_R', 'Ankle_Z_R', 'Ankle_X_R','Hip_X_L', 'Hip_Y_L', 'Knee_Z_L', 'Ankle_Z_L', 'Ankle_X_L']
     for ii in range(q.shape[1]):
         open(directory_name+'/'+dofs_names[ii]+'.csv', 'w').close() # clear the file 
         np.savetxt(directory_name+'/'+dofs_names[ii]+'.csv', q[:,ii])
@@ -161,7 +159,7 @@ def plot_joint_angle_results(directory_name:str):
     Args:
         directory_name (str): _Directory name where the data to plot are stored_
     """
-    dofs_names = ['FF_TX','FF_TY','FF_TZ','FF_Rquat0','FF_Rquat1','FF_Rquat2','FF_Rquat3','L5S1_FE','L5S1_RIE','RShoulder_FE','RShoulder_AA','RShoulder_RIE','RElbow_FE','RElbow_PS','RHip_FE','RHip_AA','RHip_RIE','RKnee_FE','RAnkle_FE']
+    dofs_names = ['Hip_Z_R', 'Hip_X_R', 'Hip_Y_R', 'Knee_Z_R', 'Ankle_Z_R', 'Ankle_X_R','Hip_X_L', 'Hip_Y_L', 'Knee_Z_L', 'Ankle_Z_L', 'Ankle_X_L']
     for name in dofs_names: 
         q_i = np.loadtxt(directory_name+'/'+name+'.csv')
         plt.plot(q_i)
@@ -169,7 +167,7 @@ def plot_joint_angle_results(directory_name:str):
         plt.show()
 
 def read_joint_angles(directory_name:str)->np.ndarray:
-    dofs_names = ['FF_TX','FF_TY','FF_TZ','FF_Rquat0','FF_Rquat1','FF_Rquat2','FF_Rquat3','L5S1_FE','L5S1_RIE','RShoulder_FE','RShoulder_AA','RShoulder_RIE','RElbow_FE','RElbow_PS','RHip_FE','RHip_AA','RHip_RIE','RKnee_FE','RAnkle_FE']
+    dofs_names = ['Hip_Z_R', 'Hip_X_R', 'Hip_Y_R', 'Knee_Z_R', 'Ankle_Z_R', 'Ankle_X_R','Hip_X_L', 'Hip_Y_L', 'Knee_Z_L', 'Ankle_Z_L', 'Ankle_X_L']
     q=[]
     for name in dofs_names: 
         q_i = np.loadtxt(directory_name+'/'+name+'.csv')

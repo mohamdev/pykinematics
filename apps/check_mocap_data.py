@@ -10,7 +10,11 @@ from utils.read_write_utils import read_lstm_data,get_lstm_mks_names,read_mocap_
 from utils.model_utils import *
 from utils.viz_utils import place
 
-fichier_csv_mocap_mks = "./data/mks_data_valid_hulahoop.csv" 
+subject = 'subject1'
+type = 'train'
+task= 'balancing'
+#fichier_csv_mocap_mks = "./data/mocap_data/Lowerbody_Cal_.csv"  #just to check the markers
+fichier_csv_mocap_mks = "./data/mocap_data/"+ subject +"/mks_data_"+ type +"_"+task +".csv"
 mocap_mks_list= read_mocap_data(fichier_csv_mocap_mks)
 
 viz = GepettoVisualizer()

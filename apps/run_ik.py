@@ -2,35 +2,31 @@
 from utils.read_write_utils import read_lstm_data, get_lstm_mks_names, read_mocap_data, convert_to_list_of_dicts, write_joint_angle_results
 from utils.ik_utils import IK_Casadi
 import pinocchio as pin 
-from utils.model_utils import get_subset_challenge_mks_names, get_segments_lstm_mks_dict_challenge, build_model_challenge
+from utils.model_utils import get_subset_challenge_mks_names, get_segments_lstm_mks_dict_challenge, build_model_challenge, get_segments_mocap_mks
 import sys
 from pinocchio.visualize import GepettoVisualizer
 from utils.viz_utils import place
 import numpy as np 
 import time 
 
-subject = 'sujet_1'
-task = 'Exotique'
 
-fichier_csv_lstm_mks_calib = "data/"+subject+"/Marche/jcp_coordinates_ncameras_augmented.csv"
-fichier_csv_lstm_mks = "data/"+subject+"/"+task+"/jcp_coordinates_ncameras_augmented.csv"
-fichier_csv_mocap_mks = "data/mks_coordinates_3D_"+subject+".trc"
+subject = 'subject1'
+type = 'train'
+task= 'balancing'
+#fichier_csv_mocap_mks = "./data/mocap_data/Lowerbody_Cal_.csv"  #just to check the markers
+fichier_csv_mocap_mks = "./data/mocap_data/"+ subject +"/mks_data_"+ type +"_"+task +".csv"
+
 meshes_folder_path = "meshes/" #Changes le par ton folder de meshes
 
 #Read data
-lstm_mks_dict, mapping = read_lstm_data(fichier_csv_lstm_mks)
-lstm_mks_dict_calib, mapping_calib = read_lstm_data(fichier_csv_lstm_mks_calib)
-lstm_mks_names = get_lstm_mks_names(fichier_csv_lstm_mks) #Liste des noms des mks du lstm (totalité des mks)
-subset_challenge_mks_names = get_subset_challenge_mks_names() #Cette fonction te retourne les noms des markers dont on a besoin pour le challenge
-mocap_mks_dict = read_mocap_data(fichier_csv_mocap_mks) #Markers mocap, pas utilisés ici car merdiques pour le moment
-lstm_mks_dict_calib = convert_to_list_of_dicts(lstm_mks_dict_calib)
-lstm_mks_dict = convert_to_list_of_dicts(lstm_mks_dict) #Je convertis ton dictionnaire de trajectoires (arrays) en une "trajectoire de dictionnaires", c'est plus facile à manipuler pour la calib
-lstm_mks_positions_calib = lstm_mks_dict_calib[0] #Je prends la première frame de la trajectoire pour construire le modèle
-seg_names_mks = get_segments_lstm_mks_dict_challenge() #Dictionnaire contenant les noms des segments + les mks correspondnat à chaque segment
+mocap_mks_list = read_mocap_data(fichier_csv_mocap_mks)
+mocap_mks_dict_sample0 = mocap_mks_list[0] 
+
+seg_names_mks = get_segments_mocap_mks()
 
 
 #C'est normal qu'il y ait deux fois le même argument, normalement le 1er argument c'est les mks mocap. 
-model, geom_model, visuals_dict = build_model_challenge(lstm_mks_positions_calib, lstm_mks_positions_calib, meshes_folder_path)
+model, geom_model, visuals_dict = build_model_challenge(mocap_mks_dict_sample0, mocap_mks_dict_sample0, meshes_folder_path)
 
 q0 = pin.neutral(model)
 q0[7:]=0.0001*np.ones(model.nq-7)
@@ -47,12 +43,12 @@ q0[7:]=0.0001*np.ones(model.nq-7)
 #     lstm_mks_dict[jj]["r_calc_study"]=lstm_mks_dict[0]["r_calc_study"]
 
 
-ik_problem = IK_Casadi(model, lstm_mks_dict, q0)
+ik_problem = IK_Casadi(model, mocap_mks_list, q0)
 
 q = ik_problem.solve_ik()
 
 q=np.array(q)
-directory_name = "results/challenge/"+subject+"/"+task
+directory_name = "results/lowerbody/"+subject+"/"+task
 write_joint_angle_results(directory_name,q)
 
 ### Visualisation of the obtained trajectory 
@@ -102,7 +98,7 @@ for i in range(len(q)):
             sphere_name_raw = f'world/{mk_name}_raw'
             mk_position = data.oMf[model.getFrameId(mk_name)].translation
             place(viz, sphere_name_model, pin.SE3(np.eye(3), np.matrix(mk_position.reshape(3,)).T))
-            place(viz, sphere_name_raw, pin.SE3(np.eye(3), np.matrix(lstm_mks_dict[i][mk_name].reshape(3,)).T))
+            place(viz, sphere_name_raw, pin.SE3(np.eye(3), np.matrix(mocap_mks_list[i][mk_name].reshape(3,)).T))
         
         #Display frames from model
         frame_name = f'world/{seg_name}'
