@@ -6,27 +6,22 @@ import os
 parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.append(parent_dir)
 from utils.read_write_utils import read_lstm_data, get_lstm_mks_names, read_mocap_data, convert_to_list_of_dicts
-from utils.model_utils import get_subset_challenge_mks_names, get_segments_lstm_mks_dict_challenge, build_model_challenge
+from utils.model_utils import get_subset_challenge_mks_names, get_segments_lstm_mks_dict_challenge, build_model_challenge, get_segments_mocap_mks
 from utils.viz_utils import place, visualize_model_and_measurements
 
-subject = 'sujet_1'
-task = 'Marche'
-fichier_csv_lstm_mks = "./data/"+subject+"/"+task+"/jcp_coordinates_ncameras_augmented.csv"
-meshes_folder_path = "./meshes/" #Changes le par ton folder de meshes
+fichier_csv_mocap_mks = "./data/mks_data_valid_hulahoop.csv" 
+meshes_folder_path = "./meshes" #Changes le par ton folder de meshes
 
 #Read data
-lstm_mks_dict, mapping = read_lstm_data(fichier_csv_lstm_mks)
-lstm_mks_names = get_lstm_mks_names(fichier_csv_lstm_mks) #Liste des noms des mks du lstm (totalité des mks)
-subset_challenge_mks_names = get_subset_challenge_mks_names() #Cette fonction te retourne les noms des markers dont on a besoin pour le challenge
-lstm_mks_dict = convert_to_list_of_dicts(lstm_mks_dict) #Je convertis ton dictionnaire de trajectoires (arrays) en une "trajectoire de dictionnaires", c'est plus facile à manipuler pour la calib
-lstm_mks_positions_calib = lstm_mks_dict[0] #Je prends la première frame de la trajectoire pour construire le modèle
-seg_names_mks = get_segments_lstm_mks_dict_challenge() #Dictionnaire contenant les noms des segments + les mks correspondnat à chaque segment
+mocap_mks_list = read_mocap_data(fichier_csv_mocap_mks)
+mocap_mks_dict_sample0 = mocap_mks_list[0] 
 
+seg_names_mks = get_segments_mocap_mks()
 
 #C'est normal qu'il y ait deux fois le même argument, normalement le 1er argument c'est les mks mocap. 
-model, geom_model, visuals_dict = build_model_challenge(lstm_mks_positions_calib, lstm_mks_positions_calib, meshes_folder_path)
+model, geom_model, visuals_dict = build_model_challenge(mocap_mks_dict_sample0, mocap_mks_dict_sample0, meshes_folder_path)
 
-
+print(model)
 visual_model = geom_model
 viz = GepettoVisualizer(model, geom_model, visual_model)
 
@@ -58,11 +53,11 @@ q0 = pin.neutral(model)
 
 viz.display(q0)
 
-q = []
-print(lstm_mks_dict[0])
-for i in range(len(lstm_mks_dict)):
-    q.append(q0)
-    q0[7] = -0.39
+# q = []
+# print(lstm_mks_dict[0])
+# for i in range(len(lstm_mks_dict)):
+#     q.append(q0)
+#     q0[7] = -0.39
 
 
 # viz.viewer.gui.addXYZaxis('world/base_frame', [255, 0., 0, 1.], 0.02, 0.15)
@@ -81,11 +76,13 @@ pin.updateFramePlacements(model, data)
 for seg_name, mks in seg_names_mks.items():
     #Display markers from model
     for mk_name in mks:
+        print(mk_name)
         sphere_name = f'world/{mk_name}'
         mk_position = data.oMf[model.getFrameId(mk_name)].translation
         place(viz, sphere_name, pin.SE3(np.eye(3), np.matrix(mk_position.reshape(3,)).T))
     
     #Display frames from model
+    print(seg_name)
     frame_name = f'world/{seg_name}'
     frame_se3= data.oMf[model.getFrameId(seg_name)]
     place(viz, frame_name, frame_se3)

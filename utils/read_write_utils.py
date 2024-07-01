@@ -63,7 +63,7 @@ def convert_to_list_of_dicts(dict_mks_data: Dict)-> List:
         List: _ list of dictionnaries for each sample._
     """
     list_of_dicts = []
-    for i in range(len(dict_mks_data['Time'])):
+    for i in range(1):  #len(dict_mks_data['Time'])
         curr_dict = {}
         for name in dict_mks_data:
             curr_dict[name] = dict_mks_data[name][i]
@@ -85,30 +85,63 @@ def get_lstm_mks_names(file_name: str):
     mk_names = [mot for mot in mk_names if pd.notna(mot)] #On enlève les nan correspondant aux cases vides du fichier csv
     return mk_names
 
-def read_mocap_data(file_path: str)->Dict:
-    """_Gets the lstm mks names_
+# def read_mocap_data(file_path: str)->Dict:
+#     """_Gets the lstm mks names_
+#     Args:
+#         file_path (str): _The name of the file to process_
+
+#     Returns:
+#         mocap_mks_positions (list): _mocap mks positions and names dict_
+#     """
+#     with open(file_path, 'r') as file:
+#         lines = file.readlines()
+    
+#     # Extracting the anatomical landmarks names from the first line
+#     landmarks = lines[0].strip().split(',')
+#     print(landmarks)
+    
+#     # Extracting the 3D positions from the second line
+#     positions = list(map(float, lines[1].strip().split(',')))
+#     print(positions)
+    
+#     # Creating a dictionary to store the 3D positions of the landmarks
+#     mocap_mks_positions = {}
+#     for i, landmark in enumerate(landmarks):
+#         # Each landmark has 3 positions (x, y, z)
+#         mocap_mks_positions[landmark] = np.array(positions[3*i:3*i+3]).reshape(3,1)
+    
+#     return mocap_mks_positions
+
+
+def read_mocap_data(file_path: str) -> list:
+    """Gets the mocap markers names and positions from a file.
+    
     Args:
-        file_path (str): _The name of the file to process_
+        file_path (str): The name of the file to process.
 
     Returns:
-        mocap_mks_positions (list): _mocap mks positions and names dict_
+        mocap_mks_positions (dict): Dictionary containing mocap markers names as keys 
+                                    and their 3D positions as values.
     """
-    with open(file_path, 'r') as file:
-        lines = file.readlines()
+    # Read the CSV file into a DataFrame
+    df = pd.read_csv(file_path)
+    # print(df.values[:,2:])
+    positions = df.values[:,2:]
+    # print(positions[0][3*0:3*0+3])
+
     
-    # Extracting the anatomical landmarks names from the first line
-    landmarks = lines[0].strip().split(',')
     
-    # Extracting the 3D positions from the second line
-    positions = list(map(float, lines[1].strip().split(',')))
+    # Extract landmarks names from the columns and remove 'Lowerbody:' prefix
+    landmarks = [col.replace('Lowerbody:', '').strip() for col in df.columns[2::3]]
     
-    # Creating a dictionary to store the 3D positions of the landmarks
-    mocap_mks_positions = {}
-    for i, landmark in enumerate(landmarks):
-        # Each landmark has 3 positions (x, y, z)
-        mocap_mks_positions[landmark] = np.array(positions[3*i:3*i+3]).reshape(3,1)
+    list_of_dicts = [] #Each 
+    for current_position in positions:
+        
+    # Initialize dictionary to store the 3D positions of the landmarks
+        mocap_mks_positions = {landmark: (np.array(current_position[3*i:3*i+3]).reshape(3,1))*1e-3 for i, landmark in enumerate(landmarks)}
+        list_of_dicts.append(mocap_mks_positions)
     
-    return mocap_mks_positions
+    return list_of_dicts
 
 def write_joint_angle_results(directory_name: str, q:np.ndarray):
     """_Write the joint angles obtained from the ik as asked by the challenge moderators_
