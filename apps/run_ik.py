@@ -10,11 +10,11 @@ import numpy as np
 import time 
 
 
-subject = 'subject1'
+trial = 'trial_01'
 type = 'train'
 task= 'balancing'
-#fichier_csv_mocap_mks = "./data/mocap_data/Lowerbody_Cal_.csv"  #just to check the markers
-fichier_csv_mocap_mks = "./data/mocap_data/"+ subject +"/mks_data_"+ type +"_"+task +".csv"
+#fichier_csv_mocap_mks = "./data/mocap_data/"+ trial +"/Lowerbody_Cal_.csv"  #just to check the markers
+fichier_csv_mocap_mks = "./data/mocap_data/"+ trial +"/mks_data_"+ type +"_"+task +".csv"
 
 meshes_folder_path = "meshes/" #Changes le par ton folder de meshes
 
@@ -48,7 +48,7 @@ ik_problem = IK_Casadi(model, mocap_mks_list, q0)
 q = ik_problem.solve_ik()
 
 q=np.array(q)
-directory_name = "results/lowerbody/"+subject+"/"+task
+directory_name = "results/lowerbody_ik/"+trial+"/"+task
 write_joint_angle_results(directory_name,q)
 
 ### Visualisation of the obtained trajectory 

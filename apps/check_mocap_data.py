@@ -10,11 +10,11 @@ from utils.read_write_utils import read_lstm_data,get_lstm_mks_names,read_mocap_
 from utils.model_utils import *
 from utils.viz_utils import place
 
-subject = 'subject1'
+trial = 'trial_01'
 type = 'train'
-task= 'balancing'
-#fichier_csv_mocap_mks = "./data/mocap_data/Lowerbody_Cal_.csv"  #just to check the markers
-fichier_csv_mocap_mks = "./data/mocap_data/"+ subject +"/mks_data_"+ type +"_"+task +".csv"
+task= 'hulahoop'
+fichier_csv_mocap_mks = "./data/mocap_data/"+ trial +"/Lowerbody_Cal_.csv"  #just to check the markers
+# fichier_csv_mocap_mks = "./data/mocap_data/"+ trial +"/mks_data_"+ type +"_"+task +".csv"
 mocap_mks_list= read_mocap_data(fichier_csv_mocap_mks)
 
 viz = GepettoVisualizer()

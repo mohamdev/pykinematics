@@ -9,11 +9,11 @@ from utils.read_write_utils import read_lstm_data, get_lstm_mks_names, read_moca
 from utils.model_utils import get_subset_challenge_mks_names, get_segments_lstm_mks_dict_challenge, build_model_challenge, get_segments_mocap_mks
 from utils.viz_utils import place, visualize_model_and_measurements
 
-subject = 'subject1'
+trial = 'trial_01'
 type = 'train'
 task= 'balancing'
-#fichier_csv_mocap_mks = "./data/mocap_data/Lowerbody_Cal_.csv"  #just to check the markers
-fichier_csv_mocap_mks = "./data/mocap_data/"+ subject +"/mks_data_"+ type +"_"+task +".csv"
+fichier_csv_mocap_mks = "./data/mocap_data/"+ trial +"/Lowerbody_Cal_.csv"  #just to check the markers
+# fichier_csv_mocap_mks = "./data/mocap_data/"+ trial +"/mks_data_"+ type +"_"+task +".csv"
 meshes_folder_path = "./meshes" #Changes le par ton folder de meshes
 
 #Read data
