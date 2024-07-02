@@ -52,7 +52,7 @@ class IK_Casadi:
 
         self._cfunction_dict=dict(zip(self._new_key_list,cfunction_list))
 
-        self._mapping_joint_angle = dict(zip(['Hip_Z_R', 'Hip_X_R', 'Hip_Y_R', 'Knee_Z_R', 'Ankle_Z_R', 'Ankle_X_R','Hip_X_L', 'Hip_Y_L', 'Knee_Z_L', 'Ankle_Z_L', 'Ankle_X_L'],np.arange(0,self._nq,1)))
+        self._mapping_joint_angle = dict(zip(['FF_TX','FF_TY','FF_TZ','FF_Rquat0','FF_Rquat1','FF_Rquat2','FF_Rquat3','Hip_Z_R', 'Hip_X_R', 'Hip_Y_R', 'Knee_Z_R', 'Ankle_Z_R', 'Ankle_X_R','Hip_Z_L','Hip_X_L', 'Hip_Y_L', 'Knee_Z_L', 'Ankle_Z_L', 'Ankle_X_L'],np.arange(0,self._nq,1)))
 
     def create_meas_list(self)-> List[Dict]:
         """_Create a list with each element is a dictionnary of measurements referencing a given sample_
@@ -196,7 +196,6 @@ class IK_Singlebody:
 # convention = 'xyz'
 # joint_angles = dk.solve_ik(parent_orientation_matrix, child_orientation_matrix, convention)
 # print("Joint angles:", joint_angles)
-
 
 
 

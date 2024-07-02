@@ -2,6 +2,8 @@ import pandas as pd
 import numpy as np
 from typing import Dict, Tuple, List
 import matplotlib.pyplot as plt 
+import os
+import csv
 
 def read_lstm_data(file_name: str)->Tuple[Dict, Dict]:
     """_Creates two dictionnaries, one containing the 3D positions of all the markers output by the LSTM, another to map the number of the marks to the JC associated_
@@ -141,17 +143,54 @@ def read_mocap_data(file_path: str) -> list:
     
     return list_of_dicts
 
-def write_joint_angle_results(directory_name: str, q:np.ndarray):
-    """_Write the joint angles obtained from the ik as asked by the challenge moderators_
+# def write_joint_angle_results(directory_name: str, q:np.ndarray):
+#     """_Write the joint angles obtained from the ik as asked by the challenge moderators_
+
+#     Args:
+#         directory_name (str): _Name of the directory to store the results_
+#         q (np.ndarray): _Joint angle results_
+#     """
+#     dofs_names = ['Hip_Z_R', 'Hip_X_R', 'Hip_Y_R', 'Knee_Z_R', 'Ankle_Z_R', 'Ankle_X_R','Hip_X_L', 'Hip_Y_L', 'Knee_Z_L', 'Ankle_Z_L', 'Ankle_X_L']
+#     for ii in range(q.shape[1]):
+#         open(directory_name+'/'+dofs_names[ii]+'.csv', 'w').close() # clear the file 
+#         np.savetxt(directory_name+'/'+dofs_names[ii]+'.csv', q[:,ii])
+
+def write_joint_angle_results(directory_name: str, q: np.ndarray, type: str, task: str):
+    """
+    Write the joint angles obtained from the ik as asked by the challenge moderators
 
     Args:
-        directory_name (str): _Name of the directory to store the results_
-        q (np.ndarray): _Joint angle results_
+        directory_name (str): Name of the directory to store the results
+        q (np.ndarray): Joint angle results
+        type (str): Type of task
+        task (str): Specific task identifier
     """
-    dofs_names = ['Hip_Z_R', 'Hip_X_R', 'Hip_Y_R', 'Knee_Z_R', 'Ankle_Z_R', 'Ankle_X_R','Hip_X_L', 'Hip_Y_L', 'Knee_Z_L', 'Ankle_Z_L', 'Ankle_X_L']
-    for ii in range(q.shape[1]):
-        open(directory_name+'/'+dofs_names[ii]+'.csv', 'w').close() # clear the file 
-        np.savetxt(directory_name+'/'+dofs_names[ii]+'.csv', q[:,ii])
+    # List of degrees of freedom (DOFs) names
+    dofs_names = [
+        'FF_TX', 'FF_TY', 'FF_TZ', 'FF_Rquat0', 'FF_Rquat1', 'FF_Rquat2', 'FF_Rquat3',
+        'Hip_Z_R', 'Hip_X_R', 'Hip_Y_R', 'Knee_Z_R', 'Ankle_Z_R', 'Ankle_X_R',
+        'Hip_Z_L', 'Hip_X_L', 'Hip_Y_L', 'Knee_Z_L', 'Ankle_Z_L', 'Ankle_X_L'
+    ]
+
+    # Ensure the directory exists
+    if not os.path.exists(directory_name):
+        os.makedirs(directory_name)
+
+    # Define the output CSV file name
+    csv_filename = os.path.join(directory_name, f"joint_angles_{type}_{task}.csv")
+
+    # Write the joint angles to the CSV file
+    with open(csv_filename, mode='w', newline='') as file:
+        writer = csv.writer(file)
+        
+        # Write the header
+        writer.writerow(dofs_names)
+        
+        # Write the data
+        for row in q:
+            writer.writerow(row)
+
+    print(f"Joint angles successfully written to {csv_filename}")
 
 def plot_joint_angle_results(directory_name:str):
     """_Plots the corresponding joint angles_

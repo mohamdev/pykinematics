@@ -6,15 +6,18 @@ import os
 parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.append(parent_dir)
 from utils.read_write_utils import read_lstm_data, get_lstm_mks_names, read_mocap_data, convert_to_list_of_dicts
-from utils.model_utils import get_subset_challenge_mks_names, get_segments_lstm_mks_dict_challenge, build_model_challenge, get_segments_mocap_mks
+from utils.model_utils import get_subset_challenge_mks_names, get_segments_lstm_mks_dict_challenge, build_model_challenge, get_segments_mocap_mks, get_segment_length
 from utils.viz_utils import place, visualize_model_and_measurements
 
 trial = 'trial_01'
 type = 'train'
-task= 'balancing'
-fichier_csv_mocap_mks = "./data/mocap_data/"+ trial +"/Lowerbody_Cal_.csv"  #just to check the markers
-# fichier_csv_mocap_mks = "./data/mocap_data/"+ trial +"/mks_data_"+ type +"_"+task +".csv"
-meshes_folder_path = "./meshes" #Changes le par ton folder de meshes
+task= 'hulahoop'
+
+# fichier_csv_mocap_mks = "./data/mocap_data/"+ trial +"/Lowerbody_Cal_.csv"  #just to check the markers , neutre
+fichier_csv_mocap_mks = "./data/mocap_data/"+ trial +"/mks_data_"+ type +"_"+task +".csv"
+meshes_folder_path = "/home/kahina/Documents/THESE/pykinematics/meshes" #Changes le par ton folder de meshes, il faut mettre le chemin absolu (jsp pk)
+path_for_segment_length = '/home/kahina/Documents/THESE/pykinematics/results/lowerbody_ik/' + trial +'/segment_length.csv' #for lowerbody ik with ML
+
 
 #Read data
 mocap_mks_list = read_mocap_data(fichier_csv_mocap_mks)
@@ -24,6 +27,8 @@ seg_names_mks = get_segments_mocap_mks()
 
 #C'est normal qu'il y ait deux fois le même argument, normalement le 1er argument c'est les mks mocap. 
 model, geom_model, visuals_dict = build_model_challenge(mocap_mks_dict_sample0, mocap_mks_dict_sample0, meshes_folder_path)
+get_segment_length(mocap_mks_dict_sample0, path_for_segment_length) #the file will be save with ik results
+
 
 print(model)
 visual_model = geom_model
@@ -57,11 +62,11 @@ q0 = pin.neutral(model)
 
 viz.display(q0)
 
-q = []
-print(mocap_mks_list[0])
-for i in range(len(mocap_mks_list)):
-    q.append(q0)
-    q0[11] = 1.22
+# q = []
+# print(mocap_mks_list[0])
+# for i in range(len(mocap_mks_list)):
+#     q.append(q0)
+#     q0[12] =np.pi/4 
 
 
 # viz.viewer.gui.addXYZaxis('world/base_frame', [255, 0., 0, 1.], 0.02, 0.15)

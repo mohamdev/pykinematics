@@ -6,6 +6,7 @@ import pinocchio as pin
 from typing import List, Tuple, Dict
 from utils.linear_algebra_utils import col_vector_3D
 from scipy.spatial.transform import Rotation as R
+import pandas as pd
 
 #Build inertia matrix from 6 inertia components
 def make_inertia_matrix(ixx:float, ixy:float, ixz:float, iyy:float, iyz:float, izz:float)->np.ndarray:
@@ -699,6 +700,22 @@ def get_local_segments_positions(sgts_poses: Dict)->Dict:
         local_positions["footL"] = (np.linalg.inv(shank_global) @ foot_global @ np.array([0, 0, 0, 1]))[:3]
     return local_positions
 
+def get_segment_length(mocap_mks_positions: Dict, path_for_segment_length: str):
+    sgts_poses = construct_segments_frames_challenge(mocap_mks_positions)
+    local_segments_positions = get_local_segments_positions(sgts_poses)
+    print('local_segments_positions', local_segments_positions)
+    # Calculate norms to get length of segments
+    norms = {}
+    norms['thighR_shankR'] = np.linalg.norm(local_segments_positions['thighR'] - local_segments_positions['shankR'])
+    norms['shankR_footR'] = np.linalg.norm(local_segments_positions['shankR'] - local_segments_positions['footR'])
+    norms['thighL_shankL'] = np.linalg.norm(local_segments_positions['thighL'] - local_segments_positions['shankL'])
+    norms['shankL_footL'] = np.linalg.norm(local_segments_positions['shankL'] - local_segments_positions['footL'])
+
+    # Save to CSV
+    df = pd.DataFrame(list(norms.items()), columns=['Segment_Pair', 'Norm']).T
+    df.to_csv(path_for_segment_length, index=False, header=False)
+
+
 
 def build_model_challenge(mocap_mks_positions: Dict, lstm_mks_positions: Dict, meshes_folder_path: str)->Tuple[pin.Model,pin.Model, Dict]:
     """_Build the biomechanical model associated to one exercise for one subject_
@@ -715,6 +732,7 @@ def build_model_challenge(mocap_mks_positions: Dict, lstm_mks_positions: Dict, m
     sgts_mks_dict =  get_segments_mocap_mks()
     lstm_mks_local_positions = get_local_mks_positions(sgts_poses, lstm_mks_positions, sgts_mks_dict)
     local_segments_positions = get_local_segments_positions(sgts_poses)
+    
     visuals_dict = {}
 
 
@@ -767,7 +785,7 @@ def build_model_challenge(mocap_mks_positions: Dict, lstm_mks_positions: Dict, m
         frame = pin.Frame(i,IDX_HIP_Y_JF,idx_frame,pin.SE3(np.eye(3,3), np.matrix(lstm_mks_local_positions[i]).T),pin.FrameType.OP_FRAME, inertia) 
         idx_frame = model.addFrame(frame,False)
 
-    upperleg_visual_R = pin.GeometryObject('upperleg_R',IDX_THIGH_SF, IDX_HIP_Y_JF, mesh_loader.load(meshes_folder_path+'/upperleg_mesh.STL'), pin.SE3(rupperarm.as_matrix(), np.matrix([-0.13, -0.37, 0.1]).T), meshes_folder_path+'/upperleg_mesh.STL',np.array([0.0060, 0.0060, 0.0060]), False , np.array([0,1,1,0.5]))
+    upperleg_visual_R = pin.GeometryObject('upperleg_R',IDX_THIGH_SF, IDX_HIP_Y_JF, mesh_loader.load(meshes_folder_path+'/upperleg_mesh.STL'), pin.SE3(rupperarm.as_matrix(), np.matrix([-0.05, -0.37, 0.1]).T), meshes_folder_path+'/upperleg_mesh.STL',np.array([0.0060, 0.0060, 0.0060]), False , np.array([0,1,1,0.5]))
     geom_model.addGeometryObject(upperleg_visual_R)
     visuals_dict["upperleg_R"] = upperleg_visual_R
 
@@ -782,11 +800,11 @@ def build_model_challenge(mocap_mks_positions: Dict, lstm_mks_positions: Dict, m
         frame = pin.Frame(i,IDX_KNEE_Z_JF,idx_frame,pin.SE3(np.eye(3,3), np.matrix(lstm_mks_local_positions[i]).T),pin.FrameType.OP_FRAME, inertia) 
         idx_frame = model.addFrame(frame,False)
     
-    knee_visual = pin.GeometryObject('knee_R',IDX_SHANK_SF, IDX_KNEE_Z_JF, mesh_loader.load(meshes_folder_path+'/knee_mesh.STL'), pin.SE3(np.eye(3), np.matrix([-0.13, 0, -0.015]).T), meshes_folder_path+'/knee_mesh.STL',np.array([0.0060, 0.0060, 0.0060]), False , np.array([0,1,1,0.5]))
+    knee_visual = pin.GeometryObject('knee_R',IDX_SHANK_SF, IDX_KNEE_Z_JF, mesh_loader.load(meshes_folder_path+'/knee_mesh.STL'), pin.SE3(np.eye(3), np.matrix([-0.05, 0, -0.015]).T), meshes_folder_path+'/knee_mesh.STL',np.array([0.0060, 0.0060, 0.0060]), False , np.array([0,1,1,0.5]))
     geom_model.addGeometryObject(knee_visual)
     visuals_dict["knee_R"] = knee_visual
 
-    lowerleg_visual_R = pin.GeometryObject('lowerleg_R',IDX_SHANK_SF, IDX_KNEE_Z_JF, mesh_loader.load(meshes_folder_path+'/lowerleg_mesh.STL'), pin.SE3(rupperarm.as_matrix(), np.matrix([-0.11, -0.40, 0.1]).T), meshes_folder_path+'/lowerleg_mesh.STL',np.array([0.0060, 0.0060, 0.0060]), False , np.array([0,1,1,0.5]))
+    lowerleg_visual_R = pin.GeometryObject('lowerleg_R',IDX_SHANK_SF, IDX_KNEE_Z_JF, mesh_loader.load(meshes_folder_path+'/lowerleg_mesh.STL'), pin.SE3(rupperarm.as_matrix(), np.matrix([-0.03, -0.40, 0.1]).T), meshes_folder_path+'/lowerleg_mesh.STL',np.array([0.0060, 0.0060, 0.0060]), False , np.array([0,1,1,0.5]))
     geom_model.addGeometryObject(lowerleg_visual_R)
     visuals_dict["lowerleg_R"] = lowerleg_visual_R
 
@@ -806,7 +824,7 @@ def build_model_challenge(mocap_mks_positions: Dict, lstm_mks_positions: Dict, m
         frame = pin.Frame(i,IDX_ANKLE_X_JF_R,idx_frame,pin.SE3(np.eye(3,3), np.matrix(lstm_mks_local_positions[i]).T),pin.FrameType.OP_FRAME, inertia) 
         idx_frame = model.addFrame(frame,False)
     
-    foot_visual_R = pin.GeometryObject('foot_R',IDX_foot_X_R, IDX_ANKLE_X_JF_R, mesh_loader.load(meshes_folder_path+'/foot_mesh.STL'), pin.SE3(rupperarm.as_matrix(), np.matrix([-0.11, -0.07, 0.09]).T), meshes_folder_path+'/foot_mesh.STL',np.array([0.0060, 0.0060, 0.0060]), False , np.array([0,1,1,0.5]))
+    foot_visual_R = pin.GeometryObject('foot_R',IDX_foot_X_R, IDX_ANKLE_X_JF_R, mesh_loader.load(meshes_folder_path+'/foot_mesh.STL'), pin.SE3(rupperarm.as_matrix(), np.matrix([-0.03, -0.07, 0.09]).T), meshes_folder_path+'/foot_mesh.STL',np.array([0.0060, 0.0060, 0.0060]), False , np.array([0,1,1,0.5]))
     geom_model.addGeometryObject(foot_visual_R)
     visuals_dict["foot_R"] = foot_visual_R
 
@@ -833,7 +851,7 @@ def build_model_challenge(mocap_mks_positions: Dict, lstm_mks_positions: Dict, m
         frame = pin.Frame(i, IDX_HIP_Y_JF_L, idx_frame, pin.SE3(np.eye(3), np.matrix(lstm_mks_local_positions[i]).T), pin.FrameType.OP_FRAME, inertia)
         idx_frame = model.addFrame(frame, False)
 
-    thigh_visual_L = pin.GeometryObject('upperleg_L', IDX_TGH_SF_L, IDX_HIP_Y_JF_L, mesh_loader.load(meshes_folder_path+'/upperleg_mesh.STL'), pin.SE3(np.eye(3), np.matrix([-0.13, -0.37, -0.105]).T), meshes_folder_path+'/upperleg_mesh.STL', np.array([0.0060, 0.0060, 0.0060]), False, np.array([0,1,1,0.5]))
+    thigh_visual_L = pin.GeometryObject('upperleg_L', IDX_TGH_SF_L, IDX_HIP_Y_JF_L, mesh_loader.load(meshes_folder_path+'/upperleg_mesh.STL'), pin.SE3(np.eye(3), np.matrix([-0.05, -0.37, -0.105]).T), meshes_folder_path+'/upperleg_mesh.STL', np.array([0.0060, 0.0060, 0.0060]), False, np.array([0,1,1,0.5]))
     geom_model.addGeometryObject(thigh_visual_L)
     visuals_dict["upperleg_L"] = thigh_visual_L
 
@@ -850,11 +868,11 @@ def build_model_challenge(mocap_mks_positions: Dict, lstm_mks_positions: Dict, m
         frame = pin.Frame(i,IDX_KNEE_Z_JF_L,idx_frame,pin.SE3(np.eye(3,3), np.matrix(lstm_mks_local_positions[i]).T),pin.FrameType.OP_FRAME, inertia) 
         idx_frame = model.addFrame(frame,False)
     
-    knee_visual = pin.GeometryObject('knee_L',IDX_SHANK_SF_L, IDX_KNEE_Z_JF_L, mesh_loader.load(meshes_folder_path+'/knee_mesh.STL'), pin.SE3(np.eye(3), np.matrix([-0.13, 0, -0.07]).T), meshes_folder_path+'/knee_mesh.STL',np.array([0.0060, 0.0060, 0.0060]), False , np.array([0,1,1,0.5]))
+    knee_visual = pin.GeometryObject('knee_L',IDX_SHANK_SF_L, IDX_KNEE_Z_JF_L, mesh_loader.load(meshes_folder_path+'/knee_mesh.STL'), pin.SE3(np.eye(3), np.matrix([-0.05, 0, -0.07]).T), meshes_folder_path+'/knee_mesh.STL',np.array([0.0060, 0.0060, 0.0060]), False , np.array([0,1,1,0.5]))
     geom_model.addGeometryObject(knee_visual)
     visuals_dict["knee_L"] = knee_visual
 
-    lowerleg_visual_L = pin.GeometryObject('lowerleg_L',IDX_SHANK_SF_L, IDX_KNEE_Z_JF_L, mesh_loader.load(meshes_folder_path+'/lowerleg_mesh.STL'), pin.SE3(rupperarm.as_matrix(), np.matrix([-0.11, -0.40, 0.05]).T), meshes_folder_path+'/lowerleg_mesh.STL',np.array([0.0060, 0.0060, 0.0060]), False , np.array([0,1,1,0.5]))
+    lowerleg_visual_L = pin.GeometryObject('lowerleg_L',IDX_SHANK_SF_L, IDX_KNEE_Z_JF_L, mesh_loader.load(meshes_folder_path+'/lowerleg_mesh.STL'), pin.SE3(rupperarm.as_matrix(), np.matrix([-0.03, -0.40, 0.05]).T), meshes_folder_path+'/lowerleg_mesh.STL',np.array([0.0060, 0.0060, 0.0060]), False , np.array([0,1,1,0.5]))
     geom_model.addGeometryObject(lowerleg_visual_L)
     visuals_dict["lowerleg_L"] = lowerleg_visual_L
 
@@ -875,7 +893,7 @@ def build_model_challenge(mocap_mks_positions: Dict, lstm_mks_positions: Dict, m
         frame = pin.Frame(i,IDX_ANKLE_X_JF_L,idx_frame,pin.SE3(np.eye(3,3), np.matrix(lstm_mks_local_positions[i]).T),pin.FrameType.OP_FRAME, inertia) 
         idx_frame = model.addFrame(frame,False)
     
-    foot_visual_L = pin.GeometryObject('foot_L',IDX_ANKLE_X_JF_L, IDX_ANKLE_X_JF_L, mesh_loader.load(meshes_folder_path+'/foot_mesh.STL'), pin.SE3(rupperarm.as_matrix(), np.matrix([-0.11, -0.07, 0.04]).T), meshes_folder_path+'/foot_mesh.STL',np.array([0.0060, 0.0060, 0.0060]), False , np.array([0,1,1,0.5]))
+    foot_visual_L = pin.GeometryObject('foot_L',IDX_ANKLE_X_JF_L, IDX_ANKLE_X_JF_L, mesh_loader.load(meshes_folder_path+'/foot_mesh.STL'), pin.SE3(rupperarm.as_matrix(), np.matrix([-0.03, -0.07, 0.04]).T), meshes_folder_path+'/foot_mesh.STL',np.array([0.0060, 0.0060, 0.0060]), False , np.array([0,1,1,0.5]))
     geom_model.addGeometryObject(foot_visual_L)
     visuals_dict["foot_L"] = foot_visual_L
 
@@ -1026,12 +1044,37 @@ def build_model_challenge(mocap_mks_positions: Dict, lstm_mks_positions: Dict, m
             .format( name, *oMi.translation.T.flat )))
 
 
-    model.upperPositionLimit[7:] = np.array([np.pi/2, 0.5, 3.142, 3.142, 1.22,0.2, np.pi/2, 1.57, 0.52, 0.52, 0.785, 0.2]) 
-    
-    model.lowerPositionLimit[7:] = np.array([-0.393, -np.pi/2, -1.047, 0.0, -1.57, -0.2, -0.393, -1.57, -2.27, -0.52, -0.785, -0.2])
+    model.upperPositionLimit[7:] = np.array([
+                                        np.pi,          #Hip_Z_R +
+                                        2.0*np.pi/9,    #Hip_X_R +
+                                        np.pi/2.0 ,     #Hip_Y_R +
+                                        0.0,            #Knee_Z_R +
+                                        np.pi/4,        #Ankle_Z_R +
+                                        np.pi/6,        #Ankle_X_R +
+                                        np.pi,          #Hip_Z_L +
+                                        np.pi,          #Hip_X_L +
+                                        np.pi/2,        #Hip_Y_L +
+                                        0.0,            #Knee_Z_L +
+                                        np.pi/4,        #Ankle_Z_L +
+                                        np.pi/6,        #Ankle_X_L +
+                                        ]) 
+
+    model.lowerPositionLimit[7:] = np.array([
+                                        -np.pi/2.0,         #Hip_Z_R -
+                                        -np.pi,             #Hip_X_R -
+                                        -np.pi/2,           #Hip_Y_R -
+                                        -3*np.pi/4.0,       #Knee_Z_R -
+                                        -np.pi/2,           #Ankle_Z_R -
+                                        -np.pi/6,           #Ankle_X_R -
+                                        -np.pi/2,           #Hip_Z_L -
+                                        -2.0*np.pi/9,       #Hip_X_L -
+                                        -np.pi/2,           #Hip_Y_L -
+                                        -3*np.pi/4.0,       #Knee_Z_L -
+                                        -np.pi/2,           #Ankle_Z_L -
+                                        -np.pi/6,           #Ankle_X_L -
+                                        ])
     # model.upperPositionLimit[7:] = np.array([0.305,0.524,3.142,3.142,1.22,2.53, 1.57, 0.52,0.52,0.785,0,0.35])
     # model.lowerPositionLimit[7:] = np.array([-0.393,-0.524,-1.047,-0.698,-1.57,0, -1.57, -2.27,-0.52,-0.785,-2.36,-0.87])
 
     return model, geom_model, visuals_dict
-
 
