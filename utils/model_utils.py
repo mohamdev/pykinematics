@@ -706,10 +706,10 @@ def get_segment_length(mocap_mks_positions: Dict, path_for_segment_length: str):
     print('local_segments_positions', local_segments_positions)
     # Calculate norms to get length of segments
     norms = {}
-    norms['thighR_shankR'] = np.linalg.norm(local_segments_positions['thighR'] - local_segments_positions['shankR'])
-    norms['shankR_footR'] = np.linalg.norm(local_segments_positions['shankR'] - local_segments_positions['footR'])
-    norms['thighL_shankL'] = np.linalg.norm(local_segments_positions['thighL'] - local_segments_positions['shankL'])
-    norms['shankL_footL'] = np.linalg.norm(local_segments_positions['shankL'] - local_segments_positions['footL'])
+    norms['upperlegR'] = np.linalg.norm(local_segments_positions['shankR'])
+    norms['lowerlegR'] = np.linalg.norm(local_segments_positions['footR'])
+    norms['upperlegL'] = np.linalg.norm(local_segments_positions['shankL'])
+    norms['lowerlegL'] = np.linalg.norm(local_segments_positions['footL'])
 
     # Save to CSV
     df = pd.DataFrame(list(norms.items()), columns=['Segment_Pair', 'Norm']).T
