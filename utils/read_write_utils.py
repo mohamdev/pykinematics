@@ -192,6 +192,36 @@ def write_joint_angle_results(directory_name: str, q: np.ndarray, type: str, tas
 
     print(f"Joint angles successfully written to {csv_filename}")
 
+
+def write_markers_to_csv(markers_list, filename):
+    # Get the marker names from the first dictionary
+    marker_names = list(markers_list[0].keys())
+    
+    # Prepare the data to write
+    data = []
+    
+    for marker_dict in markers_list:
+        row = []
+        for marker in marker_names:
+            position = marker_dict[marker].flatten()
+            row.extend(position)
+        data.append(row)
+    
+    # Write the data to a CSV file
+    with open(filename, mode='w', newline='') as file:
+        writer = csv.writer(file)
+        
+        # Write the header
+        header = []
+        for marker in marker_names:
+            header.extend([f"{marker}_x", f"{marker}_y", f"{marker}_z"])
+        writer.writerow(header)
+        
+        # Write the data rows
+        for row in data:
+            writer.writerow(row)
+
+
 def plot_joint_angle_results(directory_name:str):
     """_Plots the corresponding joint angles_
 

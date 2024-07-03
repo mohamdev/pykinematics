@@ -403,8 +403,6 @@ def get_footR_pose(mocap_mks_positions):
     else:
         ankle_center = (mocap_mks_positions['RTAM'] + mocap_mks_positions['RFAL']).reshape(3,1)/2.0
         toe_pos = (mocap_mks_positions['RFM5']+mocap_mks_positions['RFM1'])/2.0
-        print("toe pos:", toe_pos)
-        print("heel pos:", mocap_mks_positions['RFCC'])
         X = (toe_pos- mocap_mks_positions['RFCC']).reshape(3,1)
         X = X/np.linalg.norm(X)
         Z = (mocap_mks_positions['RFAL'] - mocap_mks_positions['RTAM']).reshape(3,1)
@@ -433,8 +431,6 @@ def get_footL_pose(mocap_mks_positions):
     else:
         ankle_center = (mocap_mks_positions['LTAM'] + mocap_mks_positions['LFAL']).reshape(3,1)/2.0
         toe_pos = (mocap_mks_positions['LFM5']+mocap_mks_positions['LFM1'])/2.0
-        print("toe pos:", toe_pos)
-        print("heel pos:", mocap_mks_positions['LFCC'])
         X = (toe_pos- mocap_mks_positions['LFCC']).reshape(3,1)
         X = X/np.linalg.norm(X)
         Z = (mocap_mks_positions['LTAM'] - mocap_mks_positions['LFAL']).reshape(3,1)
@@ -450,7 +446,26 @@ def get_footL_pose(mocap_mks_positions):
     return pose
 
 
+#construct foot frame and get its pose
+def get_insoleR_pose(mocap_mks_positions):
+    pose = np.eye(4,4)
+    X, Y, Z, ankle_center = [], [], [], []
 
+    ankle_center = (mocap_mks_positions['RTAM'] + mocap_mks_positions['RFAL'] + mocap_mks_positions['RFM5']+mocap_mks_positions['RFM1']).reshape(3,1)/4.0
+    toe_pos = (mocap_mks_positions['RFM5']+mocap_mks_positions['RFM1'])/2.0
+    X = (toe_pos- mocap_mks_positions['RFCC']).reshape(3,1)
+    X = X/np.linalg.norm(X)
+    Z = (mocap_mks_positions['RFAL'] - mocap_mks_positions['RTAM']).reshape(3,1)
+    Z = Z/np.linalg.norm(Z)
+    Y = np.cross(Z, X, axis=0)
+    Z = np.cross(X, Y, axis=0)
+
+    pose[:3,0] = X.reshape(3,)
+    pose[:3,1] = Y.reshape(3,)
+    pose[:3,2] = Z.reshape(3,)
+    pose[:3,3] = ankle_center.reshape(3,)
+    pose[:3,:3] = orthogonalize_matrix(pose[:3,:3])
+    return pose
 
 
 
