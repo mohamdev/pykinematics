@@ -222,6 +222,14 @@ def write_markers_to_csv(markers_list, filename):
             writer.writerow(row)
 
 
+def remove_nans_from_list_of_dicts(list_of_dicts):
+    for i in range(len(list_of_dicts)):
+        for key, value in list_of_dicts[i].items():
+            if np.isnan(value[0][0]):
+                list_of_dicts[i][key] = list_of_dicts[i-1][key]
+    return list_of_dicts
+
+
 def plot_joint_angle_results(directory_name:str):
     """_Plots the corresponding joint angles_
 

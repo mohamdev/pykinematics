@@ -6,16 +6,27 @@ from pinocchio.visualize import GepettoVisualizer
 import numpy as np
 parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.append(parent_dir)
-from utils.read_write_utils import read_lstm_data,get_lstm_mks_names,read_mocap_data,convert_to_list_of_dicts
+from utils.read_write_utils import read_lstm_data,get_lstm_mks_names,read_mocap_data,convert_to_list_of_dicts, remove_nans_from_list_of_dicts
 from utils.model_utils import *
 from utils.viz_utils import place
 
-trial = 'trial_01'
-type = 'train'
-task= 'hulahoop'
-fichier_csv_mocap_mks = "./data/mocap_data/"+ trial +"/Lowerbody_Cal_.csv"  #just to check the markers
-# fichier_csv_mocap_mks = "./data/mocap_data/"+ trial +"/mks_data_"+ type +"_"+task +".csv"
+trial = 'trial_02'
+# tache = 'pose_neutre'
+# tache = 'squat_6kg'
+# tache = 'squat_8kg'
+# tache = 'squat_attelle_6kg'
+# tache = 'squat_attelle_8kg'
+# tache = 'squat_attelle_poids_6kg'
+# tache = 'squat_attelle_poids_8kg'
+# tache = 'squat_attelle_poids'
+tache = 'squat'
+
+nom_sujet = 'Maxime'
+fichier_csv_mocap_mks= './data/mocap_data/'+trial + '/mks_' + tache +'_'+ nom_sujet + '.csv'
+
 mocap_mks_list= read_mocap_data(fichier_csv_mocap_mks)
+
+mocap_mks_list = remove_nans_from_list_of_dicts(mocap_mks_list)
 
 viz = GepettoVisualizer()
 
@@ -79,4 +90,4 @@ for i in range (len(mocap_mks_list)):
         # Place the sphere at the corresponding 3D position
         place(viz, sphere_name, pin.SE3(np.eye(3), np.matrix(value.reshape(3,)).T))
     
-    time.sleep(0.005)
+    # time.sleep(0.005)

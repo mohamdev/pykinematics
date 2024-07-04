@@ -15,6 +15,10 @@ def make_inertia_matrix(ixx:float, ixy:float, ixz:float, iyy:float, iyz:float, i
 #Function that takes as input a matrix and orthogonalizes it
 #Its mainly used to orthogonalize rotation matrices constructed by hand
 def orthogonalize_matrix(matrix:np.ndarray)->np.ndarray:
+    print(matrix)
+    print(np.linalg.norm(matrix[:3,0]))
+    print(np.linalg.norm(matrix[:3,1]))
+    print(np.linalg.norm(matrix[:3,2]))
     # Perform Singular Value Decomposition
     U, _, Vt = np.linalg.svd(matrix)
     # Reconstruct the orthogonal matrix
@@ -266,13 +270,21 @@ def get_thighR_pose(mocap_mks_positions):
         X = np.cross(Y, Z, axis=0)
         Z = np.cross(X, Y, axis=0)
     else:
+        # print(mocap_mks_positions["RIAS"])
+        # print(mocap_mks_positions["LIAS"])
+        # print(mocap_mks_positions["RFLE"])
+        # print(mocap_mks_positions["RFME"])
         dist_rPL_lPL = np.linalg.norm(mocap_mks_positions["RIAS"]-mocap_mks_positions["LIAS"])
+        # print(dist_rPL_lPL)
         pelvis_pose = get_pelvis_pose(mocap_mks_positions)
+        # print(pelvis_pose)
         hip_center = pelvis_pose[:3, 3].reshape(3,1)
         hip_center = hip_center + pelvis_pose[:3,:3].reshape(3,3) @ col_vector_3D(-0.14*dist_rPL_lPL, 0.0, 0.0)
         hip_center = hip_center + pelvis_pose[:3,:3].reshape(3,3) @ col_vector_3D(0.0, -0.3*dist_rPL_lPL, 0.0)
         hip_center = hip_center + pelvis_pose[:3,:3].reshape(3,3) @ col_vector_3D(0.0, 0.0, 0.22*dist_rPL_lPL)
         knee_center = (mocap_mks_positions['RFLE'] + mocap_mks_positions['RFME']).reshape(3,1)/2.0
+        # print(hip_center)
+        # print(knee_center)
         Y = hip_center - knee_center
         Y = Y/np.linalg.norm(Y)
         Z = (mocap_mks_positions['RFLE'] - mocap_mks_positions['RFME']).reshape(3,1)

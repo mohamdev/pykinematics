@@ -4,7 +4,7 @@ import os
 parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.append(parent_dir)
 
-from utils.read_write_utils import read_lstm_data, get_lstm_mks_names, read_mocap_data, convert_to_list_of_dicts, write_joint_angle_results
+from utils.read_write_utils import remove_nans_from_list_of_dicts, read_lstm_data, get_lstm_mks_names, read_mocap_data, convert_to_list_of_dicts, write_joint_angle_results
 from utils.ik_utils import IK_Casadi
 import pinocchio as pin 
 from utils.model_utils import get_subset_challenge_mks_names, get_segments_lstm_mks_dict_challenge, build_model_challenge, get_segments_mocap_mks
@@ -13,17 +13,25 @@ from utils.viz_utils import place
 import numpy as np 
 import time 
 
+trial = 'trial_02'
+# tache = 'pose_neutre'
+# tache = 'squat_6kg'
+# tache = 'squat_8kg'
+# tache = 'squat_attelle_6kg'
+# tache = 'squat_attelle_8kg'
+# tache = 'squat_attelle_poids_6kg'
+# tache = 'squat_attelle_poids_8kg'
+# tache = 'squat_attelle_poids'
+tache = 'squat'
+nom_sujet = 'Maxime'
 
-trial = 'trial_01'
-type = 'train'
-task= 'squat'
-#fichier_csv_mocap_mks = "./data/mocap_data/"+ trial +"/Lowerbody_Cal_.csv"  #just to check the markers
-fichier_csv_mocap_mks = "./data/mocap_data/"+ trial +"/mks_data_"+ type +"_"+task +".csv"
+fichier_csv_mocap_mks= './data/mocap_data/'+trial + '/mks_' + tache +'_'+ nom_sujet + '.csv'
 
 meshes_folder_path = "/home/kahina/Documents/THESE/pykinematics/meshes" #Changes le par ton folder de meshes
 
 #Read data
 mocap_mks_list = read_mocap_data(fichier_csv_mocap_mks)
+mocap_mks_list = remove_nans_from_list_of_dicts(mocap_mks_list)
 mocap_mks_dict_sample0 = mocap_mks_list[0] 
 
 seg_names_mks = get_segments_mocap_mks()
