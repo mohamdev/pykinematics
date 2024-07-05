@@ -1056,19 +1056,19 @@ def build_model_challenge(mocap_mks_positions: Dict, lstm_mks_positions: Dict, m
     # visuals_dict["lowerarm_L"] = lowerarm_visual_L
 
     data     = model.createData()
-    print(model.names)
+    # print(model.names)
 
 
-    # Sample a random configuration
-    q        = pin.neutral(model)
-    print('q: %s' % q.T)
-    # Perform the forward kinematics over the kinematic tree
-    pin.forwardKinematics(model,data,q)
-    # Print out the placement of each joint of the kinematic tree
+    # # Sample a random configuration
+    # q        = pin.neutral(model)
+    # print('q: %s' % q.T)
+    # # Perform the forward kinematics over the kinematic tree
+    # pin.forwardKinematics(model,data,q)
+    # # Print out the placement of each joint of the kinematic tree
     
-    for name, oMi in zip(model.names, data.oMi):
-        print(("{:<24} : {: .2f} {: .2f} {: .2f}"
-            .format( name, *oMi.translation.T.flat )))
+    # for name, oMi in zip(model.names, data.oMi):
+    #     print(("{:<24} : {: .2f} {: .2f} {: .2f}"
+    #         .format( name, *oMi.translation.T.flat )))
 
 
     model.upperPositionLimit[7:] = np.array([
