@@ -11,8 +11,8 @@ from utils.model_utils import *
 from utils.viz_utils import place
 from pathlib import Path
 
-trial = 'trial_04'
-nom_sujet = 'Zoé02'
+trial = 'trial_11'
+nom_sujet = 'Thibault02'
 
 #Ceux qui ont la totale
 tasks_names = ['squat_6kg', 'squat_8kg', 'squat_attelle_6kg', 'squat_attelle_8kg', 'squat_attelle_poids_6kg', 'squat_attelle_poids_8kg', 'squat_attelle_poids', 'squat_attelle' ,'squat'] 
@@ -40,7 +40,7 @@ for tache in tasks_names:
             for name, val in mocap_mks_list[i].items():
                 mocap_mks_list[i][name] = insole_pose[:3,:3].T.reshape(3,3) @ val.reshape(3,1) - insole_pose[:3,:3].T.reshape(3,3) @ insole_pose[:3,3].reshape(3,1)
 
-        write_markers_to_csv(mocap_mks_list, './data/mocap_data/'+trial + '/mks_infoot/mks_infoot' + tache +'_'+ nom_sujet + '.csv' )
+        write_markers_to_csv(mocap_mks_list, './data/mocap_data/'+trial + '/mks_infoot/mks_infoot_' + tache +'_'+ nom_sujet + '.csv' )
 
 # viz = GepettoVisualizer()
 

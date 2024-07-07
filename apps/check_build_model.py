@@ -9,8 +9,8 @@ from utils.read_write_utils import read_lstm_data, get_lstm_mks_names, read_moca
 from utils.model_utils import get_subset_challenge_mks_names, get_segments_lstm_mks_dict_challenge, build_model_challenge, get_segments_mocap_mks, get_segment_length
 from utils.viz_utils import place, visualize_model_and_measurements
 
-trial = 'trial_04'
-# tache = 'pose_neutre'
+trial = 'trial_11'
+tache = 'pose_neutre'
 # tache = 'squat_6kg'
 # tache = 'squat_8kg'
 # tache = 'squat_attelle_6kg'
@@ -18,12 +18,12 @@ trial = 'trial_04'
 # tache = 'squat_attelle_poids_6kg'
 # tache = 'squat_attelle_poids_8kg'
 # tache = 'squat_attelle_poids'
-tache = 'pose_neutre'
+# tache = 'pose_neutre'
 
-nom_sujet = 'Zoé'
+nom_sujet = 'Thibault'
 fichier_csv_mocap_mks= './data/mocap_data/'+trial + '/mks_' + tache +'_'+ nom_sujet + '.csv'
 meshes_folder_path = "/home/kahina/Documents/THESE/pykinematics/meshes" #Changes le par ton folder de meshes, il faut mettre le chemin absolu (jsp pk)
-# path_for_segment_length = './data/mocap_data/'+trial + '/segment_length.csv' #for lowerbody ik with ML
+path_for_segment_length = './data/mocap_data/'+trial + '/segment_length.csv' #for lowerbody ik with ML
 
 
 #Read data
@@ -34,7 +34,7 @@ seg_names_mks = get_segments_mocap_mks()
 
 #C'est normal qu'il y ait deux fois le même argument, normalement le 1er argument c'est les mks mocap. 
 model, geom_model, visuals_dict = build_model_challenge(mocap_mks_dict_sample0, mocap_mks_dict_sample0, meshes_folder_path)
-# get_segment_length(mocap_mks_dict_sample0, path_for_segment_length) #the file will be save with ik results
+get_segment_length(mocap_mks_dict_sample0, path_for_segment_length) #the file will be save with ik results
 
 
 print(model)

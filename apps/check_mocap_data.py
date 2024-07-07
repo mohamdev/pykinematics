@@ -10,18 +10,20 @@ from utils.read_write_utils import read_lstm_data,get_lstm_mks_names,read_mocap_
 from utils.model_utils import *
 from utils.viz_utils import place
 
-trial = 'trial_02'
+trial = 'trial_11'
 # tache = 'pose_neutre'
+# tache = 'squat'
 # tache = 'squat_6kg'
-# tache = 'squat_8kg'
 # tache = 'squat_attelle_6kg'
-# tache = 'squat_attelle_8kg'
 # tache = 'squat_attelle_poids_6kg'
-# tache = 'squat_attelle_poids_8kg'
-# tache = 'squat_attelle_poids'
-tache = 'squat'
+tache = 'squat_attelle_poids'
+# tache = 'squat_attelle'
 
-nom_sujet = 'Maxime'
+# tache = 'squat_8kg'
+# tache = 'squat_attelle_8kg'
+# tache = 'squat_attelle_poids_8kg'
+
+nom_sujet = 'Thibault02'
 fichier_csv_mocap_mks= './data/mocap_data/'+trial + '/mks_' + tache +'_'+ nom_sujet + '.csv'
 
 mocap_mks_list= read_mocap_data(fichier_csv_mocap_mks)
