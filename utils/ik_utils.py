@@ -1,6 +1,6 @@
 import pinocchio as pin 
-import casadi 
-import pinocchio.casadi as cpin 
+# import casadi 
+# import pinocchio.casadi as cpin 
 import quadprog
 import cyipopt
 from scipy.optimize import approx_fprime
