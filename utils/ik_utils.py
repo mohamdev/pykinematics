@@ -4,6 +4,7 @@ import pinocchio.casadi as cpin
 from typing import Dict, List
 import numpy as np 
 from scipy.spatial.transform import Rotation as R
+import math
 
 class IK_Casadi:
     """ Class to manage multi body IK problem using pinocchio casadi 
@@ -102,10 +103,16 @@ class IK_Casadi:
 
         if ii == 0:
             for key in self._cfunction_dict.keys():
-                cost+=1*casadi.sumsqr(meas[key]-self._cfunction_dict[key](Q))
+                if math.isnan(meas[key][0][0]):
+                    cost += 0.0
+                else:
+                    cost+=1*casadi.sumsqr(meas[key]-self._cfunction_dict[key](Q))
         else : 
             for key in self._cfunction_dict.keys():
-                cost+=1*casadi.sumsqr(meas[key]-self._cfunction_dict[key](Q))  + 0.001*casadi.sumsqr(casadi.dot(omega,self._q0-Q))
+                if math.isnan(meas[key][0][0]):
+                    cost += 0.0
+                else:
+                    cost+=1*casadi.sumsqr(meas[key]-self._cfunction_dict[key](Q))  + 0.001*casadi.sumsqr(casadi.dot(omega,self._q0-Q))
 
         # Set the constraint for the joint limits
         for i in range(7,self._nq):
