@@ -155,7 +155,7 @@ def read_mocap_data(file_path: str) -> list:
 #         open(directory_name+'/'+dofs_names[ii]+'.csv', 'w').close() # clear the file 
 #         np.savetxt(directory_name+'/'+dofs_names[ii]+'.csv', q[:,ii])
 
-def write_joint_angle_results(directory_name: str, q: np.ndarray, type: str, task: str):
+def write_joint_angle_results(directory_name: str, q: np.ndarray, type: str, tache, nom_sujet):
     """
     Write the joint angles obtained from the ik as asked by the challenge moderators
 
@@ -177,7 +177,7 @@ def write_joint_angle_results(directory_name: str, q: np.ndarray, type: str, tas
         os.makedirs(directory_name)
 
     # Define the output CSV file name
-    csv_filename = os.path.join(directory_name, f"joint_angles_{type}_{task}.csv")
+    csv_filename = os.path.join(directory_name, f"joint_angles_"+tache+"_"+nom_sujet+".csv")
 
     # Write the joint angles to the CSV file
     with open(csv_filename, mode='w', newline='') as file:
@@ -243,7 +243,20 @@ def plot_joint_angle_results(directory_name:str):
         plt.title(name)
         plt.show()
 
-def read_joint_angles(directory_name:str)->np.ndarray:
+def plot_joint_angle_results_lowerbody(q_ref, q_est):
+    """_Plots the corresponding joint angles_
+
+    """
+    
+
+def read_joint_angles_lowerbody(fichier_csv)->np.ndarray:
+    dofs_names = ['Hip_Z_R', 'Hip_X_R', 'Hip_Y_R', 'Knee_Z_R', 'Ankle_Z_R', 'Ankle_X_R','Hip_X_L', 'Hip_Y_L', 'Knee_Z_L', 'Ankle_Z_L', 'Ankle_X_L']
+    q_est = pd.read_csv(fichier_csv)
+    q_est=q_est[dofs_names]
+    return q_est
+
+
+def read_joint_angles(directory_name)->np.ndarray:
     dofs_names = ['Hip_Z_R', 'Hip_X_R', 'Hip_Y_R', 'Knee_Z_R', 'Ankle_Z_R', 'Ankle_X_R','Hip_X_L', 'Hip_Y_L', 'Knee_Z_L', 'Ankle_Z_L', 'Ankle_X_L']
     q=[]
     for name in dofs_names: 

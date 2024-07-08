@@ -13,7 +13,12 @@ from utils.viz_utils import place
 import numpy as np 
 import time 
 
-trial = 'trial_02'
+trial_no = input("Entrez le numéro du trial (ex: '02'): ")
+tache = input("Entrez la tâche (ex: 'squat'): ")
+nom_sujet = input("Entrez le nom du sujet (ex: 'Kahina'): ")
+
+
+# trial = 'trial_02'
 # tache = 'pose_neutre'
 # tache = 'squat_6kg'
 # tache = 'squat_8kg'
@@ -22,12 +27,12 @@ trial = 'trial_02'
 # tache = 'squat_attelle_poids_6kg'
 # tache = 'squat_attelle_poids_8kg'
 # tache = 'squat_attelle_poids'
-tache = 'squat'
-nom_sujet = 'Maxime'
+# tache = 'pose_neutre'
+# nom_sujet = 'Maxime'
 
-fichier_csv_mocap_mks= './data/mocap_data/'+trial + '/mks_' + tache +'_'+ nom_sujet + '.csv'
+fichier_csv_mocap_mks= './data/mocap_data/trial_'+trial_no + '/mks_' + tache +'_'+ nom_sujet + '.csv'
 
-meshes_folder_path = "meshes" #Changes le par ton folder de meshes
+meshes_folder_path = "/home/tbousquet/Documents/lower_body/pykinematics/meshes" #Changes le par ton folder de meshes
 
 #Read data
 mocap_mks_list = read_mocap_data(fichier_csv_mocap_mks)
@@ -52,8 +57,8 @@ q = ik_problem.solve_ik()
 
 q=np.array(q)
 # print("angleeeeeeeeeeeeeeeeeeeeeeeee", q)
-# directory_name = "results/lowerbody_ik/"+trial
-# write_joint_angle_results(directory_name,q, type, tache)
+directory_name = "results/lowerbody_ik/trial_"+trial_no
+write_joint_angle_results(directory_name,q, type, tache, nom_sujet)
 
 ### Visualisation of the obtained trajectory 
 
@@ -112,4 +117,4 @@ for i in range(len(q)):
     if i == 0:
         input("Ready?")
     else:
-        time.sleep(0.016)
+        time.sleep(0.005)
