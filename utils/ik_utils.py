@@ -7,6 +7,7 @@ from scipy.optimize import approx_fprime
 from typing import Dict, List
 import numpy as np 
 from scipy.spatial.transform import Rotation as R
+import math
 
 def quadprog_solve_qp(P: np.ndarray, q: np.ndarray, G: np.ndarray=None, h: np.ndarray=None, A: np.ndarray=None, b: np.ndarray=None):
     """_Set up the qp solver using quadprog API_
@@ -210,10 +211,16 @@ class IK_Quadprog:
 
             pin.forwardKinematics(self._model, self._data, q0)
             pin.updateFramePlacements(self._model,self._data)
+            
             for marker_name in self._keys_to_track_list:
-                self._dict_m_est[marker_name]=self._data.oMf[self._model.getFrameId(marker_name)].translation.reshape((3,1))
 
-                v_ii=(meas[marker_name]-self._dict_m_est[marker_name])/self._dt
+                self._dict_m_est[marker_name]=self._data.oMf[self._model.getFrameId(marker_name)].translation.reshape((3,1))
+                
+                if math.isnan(meas[marker_name].flatten()[0]):
+                    v_ii = 0.0
+                else:
+                    v_ii=(meas[marker_name]-self._dict_m_est[marker_name])/self._dt
+
                 mu_ii=self._damping*np.dot(v_ii.T,v_ii)
                 
                 J_ii=pin.computeFrameJacobian(self._model,self._data,q0,self._model.getFrameId(marker_name),pin.ReferenceFrame.LOCAL_WORLD_ALIGNED)
@@ -344,10 +351,16 @@ class IK_Casadi:
 
         if ii == 0:
             for key in self._cfunction_dict.keys():
-                cost+=1*casadi.sumsqr(meas[key]-self._cfunction_dict[key](Q))
+                if math.isnan(meas[key][0][0]):
+                    cost += 0.0
+                else:
+                    cost+=1*casadi.sumsqr(meas[key]-self._cfunction_dict[key](Q))
         else : 
             for key in self._cfunction_dict.keys():
-                cost+=1*casadi.sumsqr(meas[key]-self._cfunction_dict[key](Q))  + 0.001*casadi.sumsqr(casadi.dot(omega,self._q0-Q))
+                if math.isnan(meas[key][0][0]):
+                    cost += 0.0
+                else:
+                    cost+=1*casadi.sumsqr(meas[key]-self._cfunction_dict[key](Q))  + 0.001*casadi.sumsqr(casadi.dot(omega,self._q0-Q))
 
         # Set the constraint for the joint limits
         for i in range(7,self._nq):
