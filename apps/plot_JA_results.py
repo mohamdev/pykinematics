@@ -18,9 +18,9 @@ import matplotlib.pyplot as plt
 # # # Plots 
 # plot_joint_angle_results(results_directory)
 
-trial = "trial_02"
+trial = "trial_11"
 tache = "squat_attelle"
-nom_sujet = "Maxime02"
+nom_sujet = "Thibault"
 
 fichier_csv_mocap_mks = "./data/mocap_data/"+ trial + "/mks_"+ tache + "_" + nom_sujet + ".csv" #positions des mks _ref_ 
 # fichier_csv_JA_ipopt= "./results/lowerbody_ik/"+ trial + "/joint_angles_"+ tache + "_" + nom_sujet + "_ipopt.csv"
