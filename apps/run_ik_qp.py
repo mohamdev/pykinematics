@@ -36,7 +36,7 @@ meshes_folder_path = "/home/tbousquet/Documents/lower_body/pykinematics/meshes" 
 
 #Read data
 mocap_mks_list = read_mocap_data(fichier_csv_mocap_mks)
-mocap_mks_list = remove_nans_from_list_of_dicts(mocap_mks_list)
+# mocap_mks_list = remove_nans_from_list_of_dicts(mocap_mks_list)
 mocap_mks_dict_sample0 = mocap_mks_list[0] 
 
 seg_names_mks = get_segments_mocap_mks()

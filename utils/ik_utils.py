@@ -170,8 +170,9 @@ class IK_Quadprog:
         if ii == 0 : # Init to be done with ipopt
             lb = self._model.lowerPositionLimit # lower joint limits
             ub = self._model.upperPositionLimit # upper joint limits
-            cl=cu=[1]
-
+            cl=cu=[1]  # Constraint lists (single constraint here)
+            
+            # Setting up the IPOPT problem
             nlp = cyipopt.Problem(
                 n=len(self._q0),
                 m=len(cl),
@@ -182,27 +183,33 @@ class IK_Quadprog:
                 cu=cu,
                 )
 
+            # IPOPT options
             nlp.add_option('tol',1e-3)
             nlp.add_option('print_level',0)
+
+            # Solving the IPOPT problem
             q_opt, info = nlp.solve(self._q0)
 
             return q_opt
 
-        else : # QP running
-            q0=self._q0
-            
-            # Reset estimated markers dict 
+        else : # Running QP for subsequent samples
+            q0=self._q0  # Initial joint configuration
+                    
+            # Forward kinematics to update frame placements based on current joint configuration = Reset estimated markers dict 
             pin.forwardKinematics(self._model, self._data, q0)
             pin.updateFramePlacements(self._model,self._data)
-            
+
+            # Estimate marker positions based on current joint configuration
             markers_est_pos = []
             for el in self._keys_to_track_list:
                 markers_est_pos.append(self._data.oMf[self._model.getFrameId(el)].translation.reshape((3,1)))
             self._dict_m_est = dict(zip(self._keys_to_track_list,markers_est_pos))
 
-            # Set QP matrices 
+            # Initialize QP matrices
             P=np.zeros((self._nv,self._nv)) # Hessian matrix size nv \times nv
             q=np.zeros((self._nv,)) # Gradient vector size nv
+
+            # Inequality matrix G and vector h for joint limit constraints
             G=np.concatenate((np.zeros((2*(self._nv-6),6)),np.concatenate((np.identity(self._nv-6),-np.identity(self._nv-6)),axis=0)),axis=1) # Inequality matrix size number of inequalities (=nv) \times nv
 
             q_max_n=self._K_lim*(self._model.upperPositionLimit[7:]-q0[7:])/self._dt
@@ -217,12 +224,13 @@ class IK_Quadprog:
                 self._dict_m_est[marker_name]=self._data.oMf[self._model.getFrameId(marker_name)].translation.reshape((3,1))
                 
                 if math.isnan(meas[marker_name].flatten()[0]):
-                    v_ii = 0.0
+                    v_ii = np.zeros((3, 1))
                 else:
                     v_ii=(meas[marker_name]-self._dict_m_est[marker_name])/self._dt
 
                 mu_ii=self._damping*np.dot(v_ii.T,v_ii)
                 
+                #
                 J_ii=pin.computeFrameJacobian(self._model,self._data,q0,self._model.getFrameId(marker_name),pin.ReferenceFrame.LOCAL_WORLD_ALIGNED)
                 J_ii_reduced=J_ii[:3,:]
 
