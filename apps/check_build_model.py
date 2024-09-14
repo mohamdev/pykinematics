@@ -8,8 +8,10 @@ sys.path.append(parent_dir)
 from utils.read_write_utils import read_lstm_data, get_lstm_mks_names, read_mocap_data, convert_to_list_of_dicts
 from utils.model_utils import get_subset_challenge_mks_names, get_segments_lstm_mks_dict_challenge, build_model_challenge, get_segments_mocap_mks, get_segment_length
 from utils.viz_utils import place, visualize_model_and_measurements
+import CORBA as crba
+import gepetto as gep
 
-trial = 'trial_04'
+trial = 'trial_02'
 # tache = 'pose_neutre'
 # tache = 'squat_6kg'
 # tache = 'squat_8kg'
@@ -20,7 +22,7 @@ trial = 'trial_04'
 # tache = 'squat_attelle_poids'
 tache = 'pose_neutre'
 
-nom_sujet = 'Zoé'
+nom_sujet = 'Maxime'
 fichier_csv_mocap_mks= './data/mocap_data/'+trial + '/mks_' + tache +'_'+ nom_sujet + '.csv'
 meshes_folder_path = "/home/kahina/Documents/THESE/pykinematics/meshes" #Changes le par ton folder de meshes, il faut mettre le chemin absolu (jsp pk)
 # path_for_segment_length = './data/mocap_data/'+trial + '/segment_length.csv' #for lowerbody ik with ML
@@ -56,7 +58,13 @@ except AttributeError as err:
     sys.exit(0)
 
 for name, visual in visuals_dict.items():
-    viz.viewer.gui.setColor(viz.getViewerNodeName(visual, pin.GeometryType.VISUAL), [0, 1, 1, 0.5])
+    viz.viewer.gui.setColor(viz.getViewerNodeName(visual, pin.GeometryType.VISUAL), [0, 0, 1, 0.3])
+
+# viz.viewer.gui.createWindow("win1")
+
+viz.viewer.gui.setBackgroundColor1("python-pinocchio", gep.color.Color.white)
+viz.viewer.gui.setBackgroundColor2("python-pinocchio", gep.color.Color.white)
+viz.viewer.gui.addLight("light", "python-pinocchio", 360, gep.color.Color.white)
 
 # Set color for other visual objects similarly
 data = model.createData()
@@ -80,7 +88,7 @@ viz.display(q0)
 # place(viz, 'world/base_frame', pin.SE3(np.eye(3), np.matrix([0, 0, 0]).T))
 
 for seg_name, mks in seg_names_mks.items():
-    viz.viewer.gui.addXYZaxis(f'world/{seg_name}', [255, 0., 0, 1.], 0.008, 0.08)
+    viz.viewer.gui.addXYZaxis(f'world/{seg_name}', [255, 0., 0, 1.], 0.015, 0.06)
     for mk_name in mks:
         sphere_name = f'world/{mk_name}'
         viz.viewer.gui.addSphere(sphere_name, 0.01, [0, 0., 255, 1.])
@@ -91,11 +99,11 @@ pin.updateFramePlacements(model, data)
 
 for seg_name, mks in seg_names_mks.items():
     #Display markers from model
-    for mk_name in mks:
-        print(mk_name)
-        sphere_name = f'world/{mk_name}'
-        mk_position = data.oMf[model.getFrameId(mk_name)].translation
-        place(viz, sphere_name, pin.SE3(np.eye(3), np.matrix(mk_position.reshape(3,)).T))
+    # for mk_name in mks:
+    #     print(mk_name)
+    #     sphere_name = f'world/{mk_name}'
+    #     mk_position = data.oMf[model.getFrameId(mk_name)].translation
+    #     place(viz, sphere_name, pin.SE3(np.eye(3), np.matrix(mk_position.reshape(3,)).T))
     
     #Display frames from model
     print(seg_name)

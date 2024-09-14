@@ -250,6 +250,19 @@ def read_joint_angles_lowerbody(fichier_csv)->np.ndarray:
     return q_est
 
 
+
+def read_joint_angles_lowerbody_nparray(fichier_csv) -> list:
+    dofs_names = ['FF_TX','FF_TY','FF_TZ','FF_Rquat0','FF_Rquat1','FF_Rquat2','FF_Rquat3','Hip_Z_R', 'Hip_X_R', 'Hip_Y_R', 'Knee_Z_R', 'Ankle_Z_R', 'Ankle_X_R','Hip_Z_L', 'Hip_X_L', 'Hip_Y_L', 'Knee_Z_L', 'Ankle_Z_L', 'Ankle_X_L']
+    q_est = pd.read_csv(fichier_csv)
+    q_est = q_est[dofs_names]
+    
+    # Convert each row to a NumPy array and store them in a list
+    rows_as_arrays = [row.values for _, row in q_est.iterrows()]
+    
+    return rows_as_arrays
+
+
+
 def read_joint_angles(directory_name)->np.ndarray:
     dofs_names = ['Hip_Z_R', 'Hip_X_R', 'Hip_Y_R', 'Knee_Z_R', 'Ankle_Z_R', 'Ankle_X_R','Hip_X_L', 'Hip_Y_L', 'Knee_Z_L', 'Ankle_Z_L', 'Ankle_X_L']
     q=[]
