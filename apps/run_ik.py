@@ -17,7 +17,7 @@ import time
 
 trial_no = input("Entrez le numéro du trial (ex: '02'): ")
 tache = input("Entrez la tâche (ex: 'squat'): ")
-nom_sujet = input("Entrez le nom du sujet (ex: 'Kahina'): ")
+nom_sujet = input("Entrez le nom du sujet (ex: 'Maxime'): ")
 
 
 # trial = 'trial_02'
@@ -34,7 +34,7 @@ nom_sujet = input("Entrez le nom du sujet (ex: 'Kahina'): ")
 
 fichier_csv_mocap_mks= './data/mocap_data/'+"trial_"+trial_no+ '/mks_' + tache +'_'+ nom_sujet + '.csv'
 
-meshes_folder_path = "/home/tbousquet/Documents/lower_body/pykinematics/meshes" #Changes le par ton folder de meshes
+meshes_folder_path = "/meshes" #Changes le par ton folder de meshes
 
 #Read data
 mocap_mks_list = read_mocap_data(fichier_csv_mocap_mks)

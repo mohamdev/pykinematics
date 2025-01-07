@@ -26,7 +26,7 @@ fichier_csv_JA_qp= "./results/lowerbody_ik/"+ trial + "/joint_angles_"+ tache + 
 
 # q_est_ipopt= read_joint_angles_lowerbody(fichier_csv_JA_ipopt)
 q= read_joint_angles_lowerbody_nparray(fichier_csv_JA_qp)
-print(q)
+#print(q)
 
 meshes_folder_path = "/home/kahina/Documents/THESE/pykinematics/meshes" #Changes le par ton folder de meshes
 
@@ -70,8 +70,8 @@ for seg_name, mks in seg_names_mks.items():
     for mk_name in mks:
         sphere_name_model = f'world/{mk_name}_model'
         sphere_name_raw = f'world/{mk_name}_raw'
-        # viz.viewer.gui.addSphere(sphere_name_model, 0.01, [0, 0., 255, 1.])
-        # viz.viewer.gui.addSphere(sphere_name_raw, 0.01, [255, 0., 0, 1.])
+        viz.viewer.gui.addSphere(sphere_name_model, 0.01, [0, 0., 255, 1.])
+        viz.viewer.gui.addSphere(sphere_name_raw, 0.01, [255, 0., 0, 1.])
 
 # Set color for other visual objects similarly
 data = model.createData()
@@ -90,8 +90,8 @@ for i in range(len(q)):
             sphere_name_model = f'world/{mk_name}_model'
             sphere_name_raw = f'world/{mk_name}_raw'
             mk_position = data.oMf[model.getFrameId(mk_name)].translation
-            # place(viz, sphere_name_model, pin.SE3(np.eye(3), np.matrix(mk_position.reshape(3,)).T))
-            # place(viz, sphere_name_raw, pin.SE3(np.eye(3), np.matrix(mocap_mks_list[i][mk_name].reshape(3,)).T))
+            place(viz, sphere_name_model, pin.SE3(np.eye(3), np.matrix(mk_position.reshape(3,)).T))
+            place(viz, sphere_name_raw, pin.SE3(np.eye(3), np.matrix(mocap_mks_list[i][mk_name].reshape(3,)).T))
         
         #Display frames from model
         frame_name = f'world/{seg_name}'
@@ -100,7 +100,7 @@ for i in range(len(q)):
     
     if i == 0:
         input("Ready?")
-    else:
-        time.sleep(0.005)
-        input("Ready?")
+    # else:
+    #     time.sleep(0.005)
+    #     input("Ready?")
 

@@ -1,3 +1,8 @@
+import sys
+import os
+parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+sys.path.append(parent_dir)
+
 import yaml
 import json
 import os
@@ -16,6 +21,8 @@ import time
 import numpy as np
 import pandas as pd
 from scipy import signal
+import utils.utilsDataman
+
 
 #%% Rest of utils
 
@@ -1115,7 +1122,7 @@ def lowpassFilter(inputData, filtFreq, order=4):
 def TRC2numpy(pathFile, markers,rotation=None):
     # rotation is a dict, eg. {'y':90} with axis, angle for rotation
     
-    trc_file = utilsDataman.TRCFile(pathFile)
+    trc_file = utils.utilsDataman.TRCFile(pathFile)
     time = trc_file.time
     num_frames = time.shape[0]
     data = np.zeros((num_frames, len(markers)*3))
